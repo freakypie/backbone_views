@@ -2,6 +2,7 @@ index = require("./index")
 forms = require("forms")
 Backbone = require("backbone")
 
+
 class FormMixin
   form: null
 
@@ -21,7 +22,7 @@ class FormMixin
 
 
 class FormView extends index.views.MixinView
-  mixins: [SelectorMixin, FormMixin]
+  mixins: [index.mixins.SelectorMixin, FormMixin]
 
   render: (context={}) ->
     @renderForm(context)

@@ -15,6 +15,7 @@ class MixinView extends Backbone.View
       _.extend(@, mixin.prototype)
       mixin.prototype.mixin?.apply(@, [options])
 
+
 ###
 selects items on the property `ui`
 ###
@@ -31,11 +32,10 @@ class SelectorMixin
       if not @_ui
         @_ui = _.clone @ui
 
-  setupUi: () ->
+  setupUI: () ->
     if @_ui
       for name, selector of @_ui
         @ui[name] = @$el.find(selector)
-    return this
 
 
 ###
@@ -49,15 +49,44 @@ class NunjucksMixin
       @template = options.template
 
   renderNunjucksTemplate: (context={}) ->
-    if not @template.compiled
-      @template.compile()
+    if @getTemplate
+      template = @getTemplate()
+    else
+      template = @template
 
-    context = @getContext context
+    if not template.compiled
+      template.compile()
 
-    html = @template.render context
-    this.$el.html html
+    if @getContext
+      context = @getContext context
+
+    html = template.render context
+    @setElement(html)
 
     return this
+
+  bootstrapField: (name, object) ->
+    object.widget.classes = object.widget.classes or []
+    object.widget.classes.push('form-control')
+
+    inputSize = @inputSize or "col-md-4"
+    labelSize = @labelSize or "col-md-8"
+
+    label = object.labelHTML(name)
+    label = "<div class='#{labelSize}'>" + label + "</div>"
+    if object.error
+      error = '<div class="alert alert-error help-block">' +
+        object.error + '</div>'
+    else
+      error = ''
+
+    validationclass = object.value and not object.error and 'has-success' or ''
+    validationclass = object.error and 'has-error' or validationclass
+
+    widget = object.widget.toHTML(name, object)
+    widget = "<div class='#{inputSize}'>" + widget + "</div>"
+    return '<div class="form-group ' + validationclass + '">' +
+      label + widget + error + '</div>'
 
 
 ###
