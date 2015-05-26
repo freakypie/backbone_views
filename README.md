@@ -77,6 +77,8 @@ class MyView extends Backbone.View
     return this
 ```
 
+You can provide a `getContext` function to extend the context
+
 ### Selector Mixin
 
 Selects elements after rendering
