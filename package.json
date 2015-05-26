@@ -1,0 +1,17 @@
+{
+  "name": "backbone_views",
+  "version": "0.1.0",
+  "description": "A collection of views similar to django views",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "prepublish": "coffee --output lib --compile src",
+  "dependencies": {
+    "backbone": "~1.2.0",
+    "forms": "^1.1.1",
+    "underscore": "~1.8.3"
+  }
+}
