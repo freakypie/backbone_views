@@ -13,5 +13,9 @@
     "backbone": "~1.2.0",
     "forms": "^1.1.1",
     "underscore": "~1.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/freakypie/backbone_views.git"
   }
 }
