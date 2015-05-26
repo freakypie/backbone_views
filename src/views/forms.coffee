@@ -11,7 +11,11 @@ class FormMixin
     if options.renderFunc
       @renderFunc = options.renderFunc
 
+  getForm: (context) ->
+    return @form
+
   renderForm: (context={}) ->
+    form = @getForm(context)
     html = form.toHTML(renderFunc)
     @$el.html html
 
