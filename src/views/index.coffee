@@ -12,8 +12,31 @@ class MixinView extends Backbone.View
       @mixins = options.mixins
 
     for mixin in @mixins
-      _.extend(@, mixin.prototype)
-      mixin.prototype.mixin?.apply(@, [options])
+      _.defaults(@, mixin.prototype)
+      mixin.prototype.initialize?.apply(@, [options])
+
+      if mixin.prototype.events
+        @events = _.defaults(@events or {}, mixin.prototype.events)
+
+    @trigger("mixins:loaded", @)
+
+
+###
+  provides a "getContext" function that sends a "view:context" signal
+  and calls the "getContext" function of all other mixins
+###
+class ContextMixin
+
+  getContext: (context={}) ->
+
+    # we assume that this is mixed into a view or Backbone.Events
+    @trigger("view:context", context)
+
+    if @mixins
+      for mixin in @mixins
+        mixin.getContext?.bind(@)(context)
+
+    return context
 
 
 ###
@@ -21,7 +44,7 @@ selects items on the property `ui`
 ###
 class SelectorMixin
 
-  mixin: (options) ->
+  initialize: (options) ->
     if options.ui
       @ui = options.ui
 
@@ -64,29 +87,6 @@ class NunjucksMixin
     @setElement(html)
 
     return this
-
-  bootstrapField: (name, object) ->
-    object.widget.classes = object.widget.classes or []
-    object.widget.classes.push('form-control')
-
-    inputSize = @inputSize or "col-md-4"
-    labelSize = @labelSize or "col-md-8"
-
-    label = object.labelHTML(name)
-    label = "<div class='#{labelSize}'>" + label + "</div>"
-    if object.error
-      error = '<div class="alert alert-error help-block">' +
-        object.error + '</div>'
-    else
-      error = ''
-
-    validationclass = object.value and not object.error and 'has-success' or ''
-    validationclass = object.error and 'has-error' or validationclass
-
-    widget = object.widget.toHTML(name, object)
-    widget = "<div class='#{inputSize}'>" + widget + "</div>"
-    return '<div class="form-group ' + validationclass + '">' +
-      label + widget + error + '</div>'
 
 
 ###

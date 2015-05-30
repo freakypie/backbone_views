@@ -8,7 +8,7 @@ All examples below are written in coffeescript.
 ## Views
 
 
-### Mixin View
+### MixinView
 
 Provides an easy interface to mixins. All class based views in this package
 will use this as their base class.
@@ -56,7 +56,7 @@ class MyView extends bv.views.FormView
 ## Mixins
 
 
-### Nunjucks Mixin ##
+### NunjucksMixin
 
 Gives function to render a nunjucks form.
 
@@ -79,7 +79,14 @@ class MyView extends Backbone.View
 
 You can provide a `getContext` function to extend the context
 
-### Selector Mixin
+
+### ContextMixin
+
+provides a "getContext" function that sends a "view:context" signal
+All mixins can listen for this signal and update the context.
+
+
+### SelectorMixin
 
 Selects elements after rendering
 
@@ -124,3 +131,7 @@ class MyView extends bv.views.MixinView
     @renderForm(context)
     return this
 ```
+
+### BootstrapFormMixin
+
+A form mixin that provides a bootstrapping form render function `bootstrapField`
