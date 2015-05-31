@@ -70,3 +70,4 @@ class BootstrapFormMixin extends FormMixin
 module.exports =
   mixins:
     FormMixin: FormMixin
+    BootstrapFormMixin: BootstrapFormMixin

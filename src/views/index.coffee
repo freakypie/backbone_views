@@ -12,11 +12,14 @@ class MixinView extends Backbone.View
       @mixins = options.mixins
 
     for mixin in @mixins
-      _.defaults(@, mixin.prototype)
-      mixin.prototype.initialize?.apply(@, [options])
+      if mixin
+        _.defaults(@, mixin.prototype)
+        mixin.prototype.initialize?.apply(@, [options])
 
-      if mixin.prototype.events
-        @events = _.defaults(@events or {}, mixin.prototype.events)
+        if mixin.prototype.events
+          @events = _.defaults(@events or {}, mixin.prototype.events)
+      else
+        console.log "Mixin is not valid", mixin
 
     @trigger("mixins:loaded", @)
 
@@ -28,6 +31,12 @@ class MixinView extends Backbone.View
 class ContextMixin
 
   getContext: (context={}) ->
+
+    if @model
+      context.model = @model
+
+    if @collection
+      context.collection = @collection
 
     # we assume that this is mixed into a view or Backbone.Events
     @trigger("view:context", context)
@@ -94,9 +103,10 @@ Renders a nunjucks tempalte
 You can set the template on the class or pass it to the constructor
 ###
 class NunjucksView extends MixinView
-  mixins: [NunjucksMixin, SelectorMixin]
+  mixins: [NunjucksMixin, ContextMixin, SelectorMixin]
 
   render: (context={}) ->
+    @getContext(context)
     @renderNunjucksTemplate(context)
     @setupUI()
     return this

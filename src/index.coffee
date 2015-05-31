@@ -2,7 +2,8 @@ _ = require("underscore")
 
 mods = [
   require('./views/index'),
-  require('./views/forms')
+  require('./views/forms'),
+  require('./views/list')
 ]
 
 mixins = {}
