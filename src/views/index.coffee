@@ -29,6 +29,10 @@ class MixinView extends Backbone.View
       @_mixins = (m.prototype for m in @base_mixins.concat @mixins)
     return @_mixins
 
+  render: () ->
+    super()
+    @trigger "render:post"
+
 
 ###
   provides a "getContext" function that sends a "view:context" signal
@@ -40,7 +44,7 @@ class ContextMixin
   getContext: (context={}) ->
 
     if @model
-      context.model = @model
+      context.model = @model.attributes
 
     if @collection
       context.collection = @collection
@@ -116,7 +120,8 @@ class NunjucksView extends MixinView
     @getContext(context)
     @renderNunjucksTemplate(context)
     @setupUI()
-    return this
+    super(context)
+    return @
 
 
 module.exports =

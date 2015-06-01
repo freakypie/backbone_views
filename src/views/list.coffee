@@ -38,7 +38,7 @@ class ListMixin
 
   addAll: () ->
     @listEl = @getListElement()
-    @$el.empty()
+    @listEl.empty()
     @views = {}
     for model in @collection.models
       @added model
