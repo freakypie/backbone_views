@@ -4,6 +4,7 @@ _ = require("underscore")
 
 
 class MixinView extends Backbone.View
+  base_mixins: []
   mixins: []
 
   initialize: (options={}) ->
@@ -11,17 +12,22 @@ class MixinView extends Backbone.View
     if @options.mixins
       @mixins = options.mixins
 
-    for mixin in @mixins
+    for mixin in @listMixins()
       if mixin
-        _.defaults(@, mixin.prototype)
-        mixin.prototype.initialize?.apply(@, [options])
+        _.defaults(@, mixin)
+        mixin.initialize?.apply(@, [options])
 
-        if mixin.prototype.events
-          @events = _.defaults(@events or {}, mixin.prototype.events)
+        if mixin.events
+          @events = _.defaults(@events or {}, mixin.events)
       else
-        console.log "Mixin is not valid", mixin
+        console.error "Mixin is not valid", mixin
 
     @trigger("mixins:loaded", @)
+
+  listMixins: () ->
+    if not @_mixins
+      @_mixins = (m.prototype for m in @base_mixins.concat @mixins)
+    return @_mixins
 
 
 ###
@@ -29,6 +35,7 @@ class MixinView extends Backbone.View
   and calls the "getContext" function of all other mixins
 ###
 class ContextMixin
+  _skipContext: true
 
   getContext: (context={}) ->
 
@@ -38,12 +45,12 @@ class ContextMixin
     if @collection
       context.collection = @collection
 
+    for mixin in @listMixins()
+      if not mixin._skipContext
+        mixin.getContext?.bind(@)(context)
+
     # we assume that this is mixed into a view or Backbone.Events
     @trigger("view:context", context)
-
-    if @mixins
-      for mixin in @mixins
-        mixin.getContext?.bind(@)(context)
 
     return context
 
@@ -76,15 +83,15 @@ You can set the template on the class or pass it to the constructor
 ###
 class NunjucksMixin
 
-  mixin: (options) ->
+  initialize: (options) ->
     if options.template
       @template = options.template
 
+  getTemplate: () ->
+    return @template
+
   renderNunjucksTemplate: (context={}) ->
-    if @getTemplate
-      template = @getTemplate()
-    else
-      template = @template
+    template = @getTemplate()
 
     if not template.compiled
       template.compile()
@@ -103,7 +110,7 @@ Renders a nunjucks tempalte
 You can set the template on the class or pass it to the constructor
 ###
 class NunjucksView extends MixinView
-  mixins: [NunjucksMixin, ContextMixin, SelectorMixin]
+  base_mixins: [NunjucksMixin, ContextMixin, SelectorMixin]
 
   render: (context={}) ->
     @getContext(context)
@@ -114,6 +121,7 @@ class NunjucksView extends MixinView
 
 module.exports =
   mixins:
+    ContextMixin: ContextMixin
     NunjucksMixin: NunjucksMixin
     SelectorMixin: SelectorMixin
   views:

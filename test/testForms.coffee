@@ -10,36 +10,31 @@ spies = require "chai-spies"
 chai.use spies
 assert = chai.assert
 expect = chai.expect
-Backbone.$ = jQuery(jsdom.jsdom().parentWindow)
 
 
-describe "FormView", ->
+describe "FormMixin", ->
+  global.document = jsdom.jsdom()
+  global.window = global.document.parentWindow
 
   beforeEach ->
+    Backbone.$ = jQuery(jsdom.jsdom().parentWindow)
     class TestFormView extends bv.views.MixinView
       mixins: [bv.mixins.FormMixin]
       form: forms.create
         field1: forms.fields.string
           required: true
 
-      events:
-        "input change": () ->
-          console.log "input change"
-
       render: (context={}) ->
         form = @getForm()
         @$el.empty()
         @$el.append("<form>" + form.toHTML() + "</form>")
-        @delegateEvents()
-        @$el.find("input").on("change", ->
-          console.log "foo"
-        )
+        return @el
 
       formValid: (form) ->
       formInvalid: (form) ->
 
-    @view = new TestFormView(el: Backbone.$("body"))
-    @view.render()
+    @view = new TestFormView(el: Backbone.$("<div id='form'>"))
+    Backbone.$("body").append(@view.render().el)
 
     chai.spy.on @view, "formValid"
     chai.spy.on @view, "formInvalid"

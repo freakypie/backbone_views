@@ -41,6 +41,7 @@ class FormMixin
         @trigger("form:invalid", form)
         @formInvalid? form
 
+
 class BootstrapFormMixin extends FormMixin
 
   bootstrapField: (name, object) ->

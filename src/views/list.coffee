@@ -12,7 +12,7 @@ class ListMixin
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "remove", @removed
 
-    @listenTo @, "render:post", @getListElement
+    @listenTo @, "render:post", @addAll
 
   getItemView: (model) ->
     return new @itemViewClass
@@ -37,9 +37,8 @@ class ListMixin
       delete @views[model.cid]
 
   addAll: () ->
-    @listEl = getListElement()
-    @listEl.empty()
-
+    @listEl = @getListElement()
+    @$el.empty()
     @views = {}
     for model in @collection.models
       @added model
