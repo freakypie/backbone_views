@@ -26,7 +26,12 @@ class MixinView extends Backbone.View
 
   listMixins: () ->
     if not @_mixins
-      @_mixins = (m.prototype for m in @base_mixins.concat @mixins)
+      @_mixins = []
+      for m in @base_mixins.concat @mixins
+        if m
+          @_mixins.push m.prototype
+        else
+          console.error "Mixin is invalid"
     return @_mixins
 
   render: () ->
