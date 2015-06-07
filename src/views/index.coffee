@@ -1,6 +1,7 @@
 
 Backbone = require("backbone")
 _ = require("underscore")
+$ = require "jquery"
 
 
 class MixinView extends Backbone.View
@@ -91,6 +92,7 @@ Renders a nunjucks tempalte
 You can set the template on the class or pass it to the constructor
 ###
 class NunjucksMixin
+  templateSetRoot: false
 
   initialize: (options) ->
     if options.template
@@ -109,7 +111,11 @@ class NunjucksMixin
       context = @getContext context
 
     html = template.render context
-    @setElement(html)
+    if @templateSetRoot
+      @setElement(html)
+    else
+      @$el.html html
+      @delegateEvents()
 
     return this
 

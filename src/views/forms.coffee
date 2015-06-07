@@ -8,7 +8,7 @@ class FormMixin
   form: null
 
   events:
-    "form submit": "handleFormSubmit"
+    "submit form": "handleFormSubmit"
 
   initialize: (options={}) ->
     if options.form
@@ -17,23 +17,30 @@ class FormMixin
       @renderFunc = options.renderFunc
 
   getContext: (context={}) ->
-    context.form = @renderForm(context)
+    if not context.form
+      context.form = @renderForm(context)
 
   getForm: (context) ->
     return @form
 
   renderForm: (context={}) ->
     form = @getForm(context)
-    html = form.toHTML(@renderFunc)
+    if @renderFunc
+      html = form.toHTML(@renderFunc.bind(@))
+    else
+      html = form.toHTML()
     return html
 
   handleFormSubmit: (e) ->
+    e.preventDefault()
+
     data = {}
     for row in  @$(e.target).serializeArray()
       data[row.name] = row.value
-    form = @getForm(context).bind(data)
+    form = @getForm().bind(data)
 
     form.validate (err, form) =>
+      console.log "error", err, form
       if form.isValid()
         @trigger("form:valid", form)
         @formValid? form
@@ -41,31 +48,50 @@ class FormMixin
         @trigger("form:invalid", form)
         @formInvalid? form
 
+  formInvalid: (form) ->
+    @render(form: form)
+
+
+bootstrapField = (name, object) ->
+  object.widget.classes = object.widget.classes or []
+  object.widget.classes.push('form-control')
+
+  inputSize = @inputSize or "col-md-6"
+  labelSize = @labelSize or "col-md-6"
+
+  label = object.labelHTML(name)
+  label = "<label class='#{labelSize} control-label'>" + label + "</label>"
+  if object.error
+    error = '<div class="alert alert-error help-block">' +
+      object.error + '</div>'
+  else
+    error = ''
+
+  validationclass = object.value and not object.error and 'has-success' or ''
+  validationclass = object.error and 'has-error' or validationclass
+
+  widget = object.widget.toHTML(name, object)
+  widget = "<div class='#{inputSize}'>" + widget + "</div>"
+  return '<div class="form-group ' + validationclass + '">' +
+    label + widget + error + '</div>'
+
 
 class BootstrapFormMixin extends FormMixin
+  renderFunc: bootstrapField
+  formInvalid: (form) ->
 
-  bootstrapField: (name, object) ->
-    object.widget.classes = object.widget.classes or []
-    object.widget.classes.push('form-control')
+    @$el.find(".help-block").remove()
 
-    inputSize = @inputSize or "col-md-4"
-    labelSize = @labelSize or "col-md-8"
+    for name, field of form.fields
+      input = @$el.find("[name=#{name}]")
+      if field.error
+        input.after(
+          "<span class=\"help-block\">#{field.error}</span>"
+        )
+        input.parents(".form-group").addClass("has-error")
+      else
+        input.parents(".form-group").removeClass("has-error")
 
-    label = object.labelHTML(name)
-    label = "<div class='#{labelSize}'>" + label + "</div>"
-    if object.error
-      error = '<div class="alert alert-error help-block">' +
-        object.error + '</div>'
-    else
-      error = ''
-
-    validationclass = object.value and not object.error and 'has-success' or ''
-    validationclass = object.error and 'has-error' or validationclass
-
-    widget = object.widget.toHTML(name, object)
-    widget = "<div class='#{inputSize}'>" + widget + "</div>"
-    return '<div class="form-group ' + validationclass + '">' +
-      label + widget + error + '</div>'
 
 
 module.exports =

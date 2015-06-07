@@ -7,6 +7,9 @@ class ListMixin
   listSelector: null
 
   initialize: (options) ->
+
+    console.log "collection", @collection
+
     @views = {}
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
@@ -26,6 +29,7 @@ class ListMixin
     return @listEl
 
   added: (model) ->
+    console.log "added"
     view = @getItemView model
     @views[model.cid] = view
     @getListElement().append view.render().el
