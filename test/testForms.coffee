@@ -24,11 +24,11 @@ describe "FormMixin", ->
         field1: forms.fields.string
           required: true
 
-      render: (context={}) ->
+      renderer: (context={}) ->
         form = @getForm()
         @$el.empty()
         @$el.append("<form>" + form.toHTML() + "</form>")
-        return @el
+        return this
 
       formValid: (form) ->
       formInvalid: (form) ->
@@ -44,6 +44,7 @@ describe "FormMixin", ->
     @view.$("input").val("checked")
     @view.handleFormSubmit
       target: @view.$("form").get(0)
+      preventDefault: _.noop
 
     expect(@view.formInvalid).not.to.have.been.called()
     expect(@view.formValid).to.have.been.called()
@@ -52,6 +53,7 @@ describe "FormMixin", ->
 
     @view.handleFormSubmit
       target: @view.$("form").get(0)
+      preventDefault: _.noop
 
     expect(@view.formValid).not.to.have.been.called()
     expect(@view.formInvalid).to.have.been.called()
