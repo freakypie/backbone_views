@@ -5,6 +5,7 @@ _ = require "underscore"
 
 class FormMixin
   form: null
+  errorItemClass: ".alert .alert-error"
 
   events:
     "submit form": "handleFormSubmit"
@@ -19,11 +20,18 @@ class FormMixin
     if not context.form
       context.form = @renderForm(context)
 
+  getData: () ->
+    null
+
   getForm: (context) ->
     return @form
 
   renderForm: (context={}) ->
     form = @getForm(context)
+    data = @getData()
+    if data
+      form = form.bind(data)
+        
     if @renderFunc
       html = form.toHTML(@renderFunc.bind(@))
     else
@@ -46,36 +54,77 @@ class FormMixin
         @trigger("form:invalid", form)
         @formInvalid? form
 
-  formInvalid: (form) ->
-    @render(form: form)
+  applyErrors: (errors) ->
+    console.log "applying errors", errors
+    if _.isObject errors
+      for name, errorlist of errors
+        el = @$el.find("[name=#{name}]")
+        console.log el.get(0)
+        el.siblings(@errorItemClass).remove()
+        for error in errorlist
+          el.before("<div class=\"#{@errorItemClass}\">#{error}</div>")
+
+  formInvalid: (form, errors={}) ->
+    @render(form: form.toHTML(@renderFunc))
+    @applyErrors(errors)
 
 
-bootstrapField = (name, object) ->
-  object.widget.classes = object.widget.classes or []
-  object.widget.classes.push('form-control')
+class BootstrapFormMixin
 
-  inputSize = @inputSize or "col-md-6"
-  labelSize = @labelSize or "col-md-6"
+  bootstrapSimple: (name, object) ->
+    object.widget.classes = object.widget.classes or []
 
-  label = object.labelHTML(name)
-  label = "<label class='#{labelSize} control-label'>" + label + "</label>"
-  if object.error
-    error = '<div class="alert alert-error help-block">' +
-      object.error + '</div>'
-  else
-    error = ''
+    if object.error
+      error = '<div class="alert alert-error help-block">' +
+        object.error + '</div>'
+    else
+      error = ''
 
-  validationclass = object.value and not object.error and 'has-success' or ''
-  validationclass = object.error and 'has-error' or validationclass
+    validationclass = object.value and not object.error and 'has-success' or ''
+    validationclass = object.error and 'has-error' or validationclass
 
-  widget = object.widget.toHTML(name, object)
-  widget = "<div class='#{inputSize}'>" + widget + "</div>"
-  return '<div class="form-group ' + validationclass + '">' +
-    label + widget + error + '</div>'
+    if object.widget.type == "checkbox"
+      widget = object.widget.toHTML(name, object)
+      label = object.labelText name
+      return "
+        <div class=\"checkbox #{validationclass}\">
+          <label>#{widget} #{label}</label>
+        </div>
+      "
+    else
+      object.widget.classes.push('form-control')
+      widget = object.widget.toHTML(name, object)
+      label = object.labelHTML(name, classes="control-label")
+      widget = "<div class=''>" + widget + "</div>"
+      return "<div class=\"form-group #{validationclass}\">" +
+        label + widget + error + '</div>'
 
+  bootstrapRows: (name, object) ->
+    object.widget.classes = object.widget.classes or []
+    object.widget.classes.push('form-control')
 
-class BootstrapFormMixin extends FormMixin
-  renderFunc: bootstrapField
+    inputSize = @inputSize or "col-md-6"
+    labelSize = @labelSize or "col-md-6"
+
+    label = object.labelHTML(name)
+    label = "<label class='#{labelSize} control-label'>" + label + "</label>"
+    if object.error
+      error = '<div class="alert alert-error help-block">' +
+        object.error + '</div>'
+    else
+      error = ''
+
+    validationclass = object.value and not object.error and 'has-success' or ''
+    validationclass = object.error and 'has-error' or validationclass
+
+    widget = object.widget.toHTML(name, object)
+    widget = "<div class='#{inputSize}'>" + widget + "</div>"
+    form_type = "form-group"
+    return '<div class="#{form_type} #{validationclass}">' +
+      label + widget + error + '</div>'
+
+  renderFunc: @bootstrapSimple
+
   formInvalid: (form) ->
 
     @$el.find(".help-block").remove()
@@ -102,12 +151,14 @@ class AutoFormMixin
     fields = {}
     for name, value of @model.attributes
       if _.isNumber value
-        fields[name] = forms.fields.number()
+        fields[name] = forms.fields.number
+          required: true
       else if _.isBoolean value
         fields[name] = forms.fields.boolean()
       else
-        fields[name] = forms.fields.string()
-    return forms.create(fields)
+        fields[name] = forms.fields.string
+          required: true
+    return forms.create(fields, validatePastFirstError: true)
 
 
 

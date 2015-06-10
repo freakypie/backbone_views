@@ -10,13 +10,10 @@
   },
   "author": "",
   "license": "BSD-2-Clause",
-  "dependencies": {
+  "peerDependencies": {
     "backbone": "~1.2.0",
     "forms": "^1.1.1",
-    "jquery": "^2.1.4",
-    "path": "^0.11.14",
-    "underscore": "~1.8.3",
-    "url-join": "0.0.1"
+    "underscore": "~1.8.3"
   },
   "keywords": [
     "backbone",
@@ -28,6 +25,7 @@
     "url": "https://github.com/freakypie/backbone_views.git"
   },
   "devDependencies": {
+    "jquery": "^2.0.0",
     "chai": "^2.3.0",
     "mocha": "^2.2.5",
     "node-jsdom": "^3.1.5"

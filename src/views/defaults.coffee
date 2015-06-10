@@ -33,12 +33,13 @@ class CreateView extends index.views.MixinView
           "collection use CreateView"
 
   formValid: (form) ->
+    console.log "saving form"
     valid = @model.save(
       form.data,
       success: @success.bind(@)
-      error: =>
-        console.log "failed to save"
-        @formInvalid
+      error: (model, retval) =>
+        console.log "failed to save", form, retval.responseJSON
+        @formInvalid(form, retval.responseJSON)
     )
     if valid is false
       @formInvalid(form)
@@ -55,13 +56,42 @@ class UpdateView extends index.views.MixinView
   ]
   template: _.template "<form><%= form %></form>"
 
+  initialize: (options) ->
+    if not options.id
+      console.error "Failed to send an id to this update view"
+      return
+    if not @collection and not options.collection
+      console.error "Failed to send a collection to this update view"
+      console.error "options", options
+      return
+
+    if not @collection
+      @collection = options.collection
+
+    @model = @collection.get(options.id)
+    if not @model
+      console.log "model doesn't exist, lets' check the server"
+      @model = new @collection.model
+      @model.id = options.id
+      @model.fetch
+        success: =>
+          console.log "fetched model"
+          @render()
+
+      @collection.add @model
+
+    super(options)
+
+  getData: () ->
+    return @model.attributes
+
   formValid: (form) ->
     valid = @model.save(
       form.data,
       success: @success.bind(@)
-      error: =>
+      error: (retval) =>
         console.log "failed to save"
-        @formInvalid
+        @formInvalid(form, retval)
     )
     if valid is false
       @formInvalid(form)

@@ -113,7 +113,6 @@ describe "UpdateView", ->
     assert.equal @view.$el.find("#id_foo").length, 1
     @view.$el.find("#id_foo").val("chew")
     _.defer =>
-      console.log @view.$el.html()
       assert.equal @view.$el.find("#id_bar").prop("checked"), true
       @view.handleFormSubmit
         target: @view.$("form").get(0)

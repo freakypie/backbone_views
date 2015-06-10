@@ -1,7 +1,6 @@
 
 Backbone = require("backbone")
 _ = require("underscore")
-$ = require "jquery"
 
 
 class MixinView extends Backbone.View
@@ -28,7 +27,7 @@ class MixinView extends Backbone.View
   listMixins: () ->
     if not @_mixins
       @_mixins = []
-      for m in @base_mixins.concat @mixins
+      for m in @mixins.concat @base_mixins
         if m
           @_mixins.push m.prototype
         else
@@ -58,8 +57,8 @@ class MixinView extends Backbone.View
     if @renderer
       @renderer context
     else if @template
-      # console.log context
-      @setElement @template context
+      console.log context
+      @$el.html @template context
     @trigger "render:post"
     return this
 
