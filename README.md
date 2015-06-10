@@ -24,6 +24,9 @@ A mixin is just a class. The prototyp will be mixed in the current class.
 If a `mixin` method is provided by the mixin, the it will be called during
 the view's `initialize` method.
 
+This view also provides basic rendering. It will call the template property
+of the view if it exists.
+
 
 ### NunjucksView
 
