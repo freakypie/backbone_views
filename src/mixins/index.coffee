@@ -35,34 +35,32 @@ class MixinView extends Backbone.View
           console.error "Mixin is invalid"
     return @_mixins
 
-  render: () ->
-    super()
-    @trigger "render:post"
-
-
-###
-  provides a "getContext" function that sends a "view:context" signal
-  and calls the "getContext" function of all other mixins
-###
-class ContextMixin
-  _skipContext: true
-
   getContext: (context={}) ->
 
     if @model
-      context.model = @model.attributes
+      context.model = @model
+      _.extend context, @model.attributes
 
     if @collection
       context.collection = @collection
 
     for mixin in @listMixins()
-      if not mixin._skipContext
-        mixin.getContext?.bind(@)(context)
+      mixin.getContext?.bind(@)(context)
 
     # we assume that this is mixed into a view or Backbone.Events
     @trigger("view:context", context)
 
     return context
+
+  render: (context={}) ->
+    @trigger "render:pre"
+    context = @getContext context
+    if @renderer
+      @renderer context
+    else if @template
+      @setElement @template context
+    @trigger "render:post"
+    return this
 
 
 ###
@@ -101,7 +99,7 @@ class NunjucksMixin
   getTemplate: () ->
     return @template
 
-  renderNunjucksTemplate: (context={}) ->
+  renderer: (context={}) ->
     template = @getTemplate()
 
     if not template.compiled
@@ -120,26 +118,9 @@ class NunjucksMixin
     return this
 
 
-###
-Renders a nunjucks tempalte
-You can set the template on the class or pass it to the constructor
-###
-class NunjucksView extends MixinView
-  base_mixins: [NunjucksMixin, ContextMixin, SelectorMixin]
-
-  render: (context={}) ->
-    @getContext(context)
-    @renderNunjucksTemplate(context)
-    @setupUI()
-    super(context)
-    return @
-
-
 module.exports =
   mixins:
-    ContextMixin: ContextMixin
     NunjucksMixin: NunjucksMixin
     SelectorMixin: SelectorMixin
   views:
     MixinView: MixinView
-    NunjucksView: NunjucksView

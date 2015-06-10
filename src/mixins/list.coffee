@@ -5,11 +5,10 @@ _ = require "underscore"
 class ListMixin
   itemViewClass: null
   listSelector: null
+  emptySelector: ".empty"
+  emptyToggleClass: "hide"
 
   initialize: (options) ->
-
-    console.log "collection", @collection
-
     @views = {}
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
@@ -23,29 +22,44 @@ class ListMixin
 
   getListElement: () ->
     if @listSelector
-      @listEl = @$el.find @listSelector
+      selected = @$el.find @listSelector
+      if selected.length > 0
+        @listEl = selected
+      else
+        @listEl = @$el
     else
       @listEl = @$el
     return @listEl
 
   added: (model) ->
-    console.log "added"
     view = @getItemView model
     @views[model.cid] = view
     @getListElement().append view.render().el
+    @showEmpty()
 
   removed: (model) ->
     view = @views[model.cid]
     if view
       view.remove()
       delete @views[model.cid]
+      @showEmpty()
 
   addAll: () ->
     @listEl = @getListElement()
     @listEl.empty()
     @views = {}
-    for model in @collection.models
-      @added model
+    if @collection.length > 0
+      for model in @collection.models
+        @added model
+
+    @showEmpty()
+
+  showEmpty: () ->
+    if @emptySelector
+      if @collection.length == 0
+        @$el.find(@emptySelector).removeClass @emptyToggleClass
+      else
+        @$el.find(@emptySelector).addClass @emptyToggleClass
 
 
 module.exports =

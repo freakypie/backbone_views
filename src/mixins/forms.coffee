@@ -1,4 +1,3 @@
-index = require("./index")
 forms = require("forms")
 Backbone = require("backbone")
 _ = require "underscore"
@@ -40,7 +39,6 @@ class FormMixin
     form = @getForm().bind(data)
 
     form.validate (err, form) =>
-      console.log "error", err, form
       if form.isValid()
         @trigger("form:valid", form)
         @formValid? form
