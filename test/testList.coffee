@@ -7,6 +7,8 @@ _ = require "underscore"
 chai = require "chai"
 spies = require "chai-spies"
 
+require "./testBase"
+
 chai.use spies
 assert = chai.assert
 expect = chai.expect
@@ -14,8 +16,6 @@ expect = chai.expect
 describe "ListMixin", ->
 
   beforeEach ->
-    global.document = jsdom.jsdom()
-    global.window = global.document.parentWindow
 
     class TestItemView extends Backbone.View
       el: "<div class='item'>"
@@ -27,6 +27,7 @@ describe "ListMixin", ->
     @view = new TestView
       el: Backbone.$("<div id='list'>").get(0)
       collection: new Backbone.Collection [{name: "one"}, {name: "two"}]
+
     Backbone.$("body").append(@view.el)
     @view.trigger "render:post"
 

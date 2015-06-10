@@ -28,6 +28,31 @@ This view also provides basic rendering. It will call the template property
 of the view if it exists.
 
 
+## Default Generic Views
+The views below are just simple implementations that use the mixins listed
+at the bottom of the doc. For complicated stuff, you probably should write
+your own.
+
+
+### ListView
+Uses the `ListMixin` below and a `DetailView` to provide a functioning list.
+This view only requires that you give it a collection and it will make
+an auto managed list. You really should override the detail template at least.
+
+### CreateView
+A simple view that uses the `FormMixin` to create and add a model to a
+collection. You must provide a collection for this view to work.
+
+### DetailView
+Uses the `DetailMixin` below
+
+### UpdateView
+A simple view that updates a model using the `FormMixin`
+
+### DeleteView
+A simple view that provides a confirm form before destroying a model
+
+
 ## Mixins
 
 
@@ -37,28 +62,14 @@ Gives function to render a nunjucks form.
 
 ```coffeescript
 bv = require("backbone_views")
-Backbone = require("backbone")
-underscore = require("underscore")
 
 
-class MyView extends Backbone.View
+class MyView extends bv.views.MixinView
+  mixins: [bv.mixins.NunjucksMixin]
   template: require("my_view.html")
-
-  initialize: () ->
-      _.extend @, bv.mixins.NunjucksMixin
-
-  render: () ->
-    @renderNunjucksTemplate()
-    return this
 ```
 
 You can provide a `getContext` function to extend the context
-
-
-### ContextMixin
-
-provides a "getContext" function that sends a "view:context" signal
-All mixins can listen for this signal and update the context.
 
 
 ### SelectorMixin
@@ -67,22 +78,14 @@ Selects elements after rendering
 
 ```coffeescript
 bv = require("backbone_views")
-Backbone = require("backbone")
-underscore = require("underscore")
 
 
-class MyView extends Backbone.View
-
+class MyView extends bv.views.MixinView
   ui:
     input: ".form input#foo"
 
-  initialize: () ->
-      _.extend @, bv.mixins.SelectorMixin
-
-  render: () ->
-    @selectUI()
-    #ui.input is set to the element in the selector
-    return this
+  # here is how you can use it, it will be jQueryied
+  myFunc: () -> alert @ui.input.val()
 ```
 
 ### FormMixin
@@ -91,9 +94,8 @@ Provides a `renderForm` method to render a form from the npm forms package.
 (Dang, that sentence is not formed well :D )
 
 ```coffeescript
-bv = require("backbone_views")
-Backbone = require("backbone")
-underscore = require("underscore")
+bv = require "backbone_views"
+forms = require "forms"
 
 
 class MyView extends bv.views.MixinView
@@ -101,24 +103,20 @@ class MyView extends bv.views.MixinView
   form: forms.create(
     name: form.fields.string(required: true)
   )
-
-  render: (context={}) ->
-    @renderForm(context)
-    return this
 ```
 
 ### BootstrapFormMixin
 
 A form mixin that provides a bootstrapping form render function `bootstrapField`
-
+for those who use bootstrap3
 
 ### ListMixin
 
 When this mixin is provided a collection it will register listeners to
 auto populate the collection in the view.
 
-If a `listSelector` isn't provided, it will assume the list should be
-populated on the view's `el`.
+If a `listSelector` isn't provided or selects nothing,
+it will assume the list should be populated on the view's `el`.
 
 If an `emptySelector` is provided, it will hide/show the selector's results
 whenever the list is empty/exists
@@ -145,3 +143,15 @@ this model and the dom will be kept in sync
 By default it will autobind unbound attrs to "data-{{ name }}", but you
 can set the `autoBind` property to change it to something else or turn
 off this feature.
+
+```coffeescript
+bv = require("backbone_views")
+Backbone = require("backbone")
+
+
+class MyView extends bv.views.MixinView
+  mixins: [bv.mixins.DetailView]  
+  bindings:
+    fruit: "div .apple"
+  template: '...'
+```

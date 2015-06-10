@@ -91,8 +91,39 @@ class BootstrapFormMixin extends FormMixin
         input.parents(".form-group").removeClass("has-error")
 
 
+###
+  automatically attempts to create a form based on a model
+  This is used to get started, and probably shouldn't be used
+  in production
+###
+class AutoFormMixin
+
+  getForm: () ->
+    fields = {}
+    for name, value of @model.attributes
+      if _.isNumber value
+        fields[name] = forms.fields.number()
+      else if _.isBoolean value
+        fields[name] = forms.fields.boolean()
+      else
+        fields[name] = forms.fields.string()
+    return forms.create(fields)
+
+
+
+### Not sure if this is useful yet, it is tentatively here ###
+class FormRedirectMixin
+  successUrl: ".."
+  router: null
+
+  initialize: (options) ->
+    @listenTo @, "form:valid", =>
+      @router.navigate @successUrl, trigger: true
+
 
 module.exports =
   mixins:
     FormMixin: FormMixin
+    AutoFormMixin: AutoFormMixin
+    FormRedirectMixin: FormRedirectMixin
     BootstrapFormMixin: BootstrapFormMixin

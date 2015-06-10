@@ -7,6 +7,8 @@ _ = require "underscore"
 chai = require "chai"
 spies = require "chai-spies"
 
+require "./testBase"
+
 chai.use spies
 assert = chai.assert
 expect = chai.expect
@@ -15,9 +17,6 @@ expect = chai.expect
 describe "DetailMixin", ->
 
   beforeEach ->
-    global.document = jsdom.jsdom()
-    global.window = global.document.parentWindow
-    Backbone.$ = jQuery(jsdom.jsdom().parentWindow)
 
     class TestView extends bv.views.MixinView
       mixins: [bv.mixins.DetailMixin]

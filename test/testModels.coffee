@@ -8,15 +8,11 @@ chai = require "chai"
 spies = require "chai-spies"
 nunjucks = require "nunjucks"
 
+require "./testBase"
 
 chai.use spies
 assert = chai.assert
 expect = chai.expect
-
-
-beforeEach ->
-  global.document = jsdom.jsdom()
-  global.window = global.document.parentWindow
 
 
 describe "BaseModel", ->

@@ -2,10 +2,11 @@ bv = require "../src/index.coffee"
 forms = require "forms"
 jQuery = require "jquery"
 Backbone = require "backbone"
-jsdom = require "node-jsdom"
 _ = require "underscore"
 chai = require "chai"
 spies = require "chai-spies"
+
+require "./testBase"
 
 chai.use spies
 assert = chai.assert
@@ -13,11 +14,8 @@ expect = chai.expect
 
 
 describe "FormMixin", ->
-  global.document = jsdom.jsdom()
-  global.window = global.document.parentWindow
 
   beforeEach ->
-    Backbone.$ = jQuery(jsdom.jsdom().parentWindow)
     class TestFormView extends bv.views.MixinView
       mixins: [bv.mixins.FormMixin]
       form: forms.create
