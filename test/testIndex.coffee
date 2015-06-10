@@ -25,6 +25,10 @@ describe "MixinView", ->
     init = chai.spy()
     loaded = chai.spy()
 
+    class ContextProvider
+      getContext: (context) ->
+        context.foo = true
+
     class TestMixin
       replaced: true
 
@@ -34,8 +38,13 @@ describe "MixinView", ->
         @listenTo @, "mixins:loaded", loaded
 
     class TestView extends bv.views.MixinView
-      mixins: [TestMixin]
+      mixins: [ContextProvider, TestMixin]
       replaced: false
+
+      initialize: () ->
+        super()
+        @listenTo @, "view:context", (context) ->
+          context.listened = true
 
     @view = new TestView(el: Backbone.$("<div>"))
     Backbone.$("body").append(@view.render().el)
@@ -44,7 +53,7 @@ describe "MixinView", ->
     @loaded = loaded
 
   it "adds mixins from `mixins` property", ->
-    assert.equal(@view.listMixins().length, 1)
+    assert.equal(@view.listMixins().length, 2)
 
   it "calls `initialize` from every mixin", ->
     assert.equal(@init.__spy.calls.length, 1)
@@ -54,25 +63,6 @@ describe "MixinView", ->
 
   it "sends `mixins:loaded` signal", ->
     assert.equal(@loaded.__spy.calls.length, 1)
-
-
-describe "ContextMixin", ->
-
-  beforeEach ->
-    class ContextProvider
-      getContext: (context) ->
-        context.foo = true
-
-    class TestView extends bv.views.MixinView
-      mixins: [bv.mixins.ContextMixin, ContextProvider]
-
-      initialize: () ->
-        super()
-        @listenTo @, "view:context", (context) ->
-          context.listened = true
-
-    @view = new TestView(el: Backbone.$("<div>"))
-    Backbone.$("body").append(@view.render().el)
 
   it "calls all other context providers", ->
     assert.equal @view.getContext().foo, true
@@ -110,10 +100,7 @@ describe "NunjucksMixin", ->
     class TestView extends bv.views.MixinView
       mixins: [bv.mixins.NunjucksMixin]
       template: template1
-
-      render: () ->
-        @renderNunjucksTemplate()
-        return @
+      templateSetRoot: true
 
     @view = new TestView(el: Backbone.$("<div id='no'></div>"))
     Backbone.$("body").append(@view.render().el)

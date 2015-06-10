@@ -20,41 +20,13 @@ class MyView extends bv.views.MixinView
   mixins: [bv.mixins.SelectorMixin]
 ```
 
-A mixin is just a class. The prototyp will be mixed in the current class.
+A mixin is just a class. The prototype will be mixed in the current class.
 If a `mixin` method is provided by the mixin, the it will be called during
 the view's `initialize` method.
 
 This view also provides basic rendering. It will call the template property
 of the view if it exists.
 
-
-### NunjucksView
-
-Renders a nunjucks template. Set the `template` on the view
-
-```coffeescript
-bv = require("backbone_views")
-
-class MyView extends bv.views.NunjucksView
-  template: require("templates/my_view.html")
-```
-
-Can also use the Nunjucks mixin in backbone_views.mixins
-Includes the SelectorMixin
-
-### FormView
-
-Renders a form based on the npm package `forms`. Set the form on the view
-
-```coffeescript
-bv = require("backbone_views")
-forms = require("forms")
-
-class MyView extends bv.views.FormView
-  form: forms.create(
-    name: form.fields.string(required: true)
-  )
-```
 
 ## Mixins
 
@@ -113,7 +85,7 @@ class MyView extends Backbone.View
     return this
 ```
 
-### Form Mixin
+### FormMixin
 
 Provides a `renderForm` method to render a form from the npm forms package.
 (Dang, that sentence is not formed well :D )
@@ -138,3 +110,38 @@ class MyView extends bv.views.MixinView
 ### BootstrapFormMixin
 
 A form mixin that provides a bootstrapping form render function `bootstrapField`
+
+
+### ListMixin
+
+When this mixin is provided a collection it will register listeners to
+auto populate the collection in the view.
+
+If a `listSelector` isn't provided, it will assume the list should be
+populated on the view's `el`.
+
+If an `emptySelector` is provided, it will hide/show the selector's results
+whenever the list is empty/exists
+
+```coffeescript
+bv = require("backbone_views")
+Backbone = require("backbone")
+
+
+class MyView extends bv.views.MixinView
+  mixins: [bv.mixins.ListMixin]  
+  listSelector: ".list"
+  emptySelector: ".empty"
+  collection: new Backbone.Collection([{foo: "boo"}])
+  template: '...'
+```
+
+### DetailMixin
+
+This provides an easy way to bind properties to a view.
+Set the property name and a selector on the `bindings` property and then
+this model and the dom will be kept in sync
+
+By default it will autobind unbound attrs to "data-{{ name }}", but you
+can set the `autoBind` property to change it to something else or turn
+off this feature.

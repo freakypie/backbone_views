@@ -50,8 +50,7 @@ class ContextMixin
   getContext: (context={}) ->
 
     if @model
-      context.model = @model
-      _.extend context, @model.attributes
+      context.model = @model.attributes
 
     if @collection
       context.collection = @collection
@@ -64,18 +63,6 @@ class ContextMixin
     @trigger("view:context", context)
 
     return context
-
-  render: (context={}) ->
-    @trigger "render:pre", context
-    @getContext context
-
-    console.log "context", context
-
-    if @template
-      @$el.html @template context
-    else
-      super()
-    @trigger "render:post"
 
 
 ###
