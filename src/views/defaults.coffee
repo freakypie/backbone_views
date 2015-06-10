@@ -68,10 +68,10 @@ class UpdateView extends index.views.MixinView
 
   success: (model) ->
 
+
 class DeleteView extends index.views.MixinView
   base_mixins: [detail.mixins.DetailMixin]
   template: _.template "<div>You need to override this template</div>"
-
 
 
 module.exports =
