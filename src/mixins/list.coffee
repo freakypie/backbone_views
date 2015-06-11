@@ -6,6 +6,7 @@ class ListMixin
   itemViewClass: null
   listSelector: null
   emptySelector: ".empty"
+  existsSelector: ".exists"
   emptyToggleClass: "hide"
 
   initialize: (options) ->
@@ -60,6 +61,11 @@ class ListMixin
         @$el.find(@emptySelector).removeClass @emptyToggleClass
       else
         @$el.find(@emptySelector).addClass @emptyToggleClass
+    if @existsSelector
+      if @collection.length > 0
+        @$el.find(@existsSelector).removeClass @emptyToggleClass
+      else
+        @$el.find(@existsSelector).addClass @emptyToggleClass
 
 
 module.exports =
