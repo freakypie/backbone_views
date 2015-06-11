@@ -120,7 +120,7 @@ class BootstrapFormMixin
     widget = object.widget.toHTML(name, object)
     widget = "<div class='#{inputSize}'>" + widget + "</div>"
     form_type = "form-group"
-    return '<div class="#{form_type} #{validationclass}">' +
+    return "<div class=\"#{form_type} #{validationclass}\">" +
       label + widget + error + '</div>'
 
   renderFunc: @bootstrapSimple
