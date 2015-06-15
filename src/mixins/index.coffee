@@ -58,6 +58,7 @@ class MixinView extends Backbone.View
     if @renderer
       @renderer context
     else if @template
+      @$el.html @template context
     @trigger "render:post"
     return this
 
