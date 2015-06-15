@@ -7,7 +7,10 @@ _ = require "underscore"
 
 
 class DetailView extends index.views.MixinView
-  base_mixins: [detail.mixins.DetailMixin]
+  base_mixins: [
+    detail.mixins.SingleObjectMixin,
+    detail.mixins.DetailMixin
+  ]
   template: _.template "<div><%= model.toString() %></div>"
 
 
@@ -51,36 +54,11 @@ class CreateView extends index.views.MixinView
 
 class UpdateView extends index.views.MixinView
   base_mixins: [
+    detail.mixins.SingleObjectMixin,
     form.mixins.AutoFormMixin,
     form.mixins.FormMixin
   ]
   template: _.template "<form><%= form %></form>"
-
-  initialize: (options) ->
-    if not options.id
-      console.error "Failed to send an id to this update view"
-      return
-    if not @collection and not options.collection
-      console.error "Failed to send a collection to this update view"
-      console.error "options", options
-      return
-
-    if not @collection
-      @collection = options.collection
-
-    @model = @collection.get(options.id)
-    if not @model
-      console.log "model doesn't exist, lets' check the server"
-      @model = new @collection.model
-      @model.id = options.id
-      @model.fetch
-        success: =>
-          console.log "fetched model"
-          @render()
-
-      @collection.add @model
-
-    super(options)
 
   getData: () ->
     return @model.attributes

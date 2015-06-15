@@ -38,7 +38,8 @@ class MixinView extends Backbone.View
 
     if @model
       context.model = @model
-      _.extend context, @model.attributes
+      if @model.attributes
+        _.extend context, @model.attributes
 
     if @collection
       context.collection = @collection
@@ -57,8 +58,6 @@ class MixinView extends Backbone.View
     if @renderer
       @renderer context
     else if @template
-      # console.log context
-      @$el.html @template context
     @trigger "render:post"
     return this
 
@@ -112,7 +111,10 @@ class NunjucksMixin
 
     html = template.render context
     if @templateSetRoot
+      parent = @$el.parent()
       @setElement(html)
+      if parent.length > 0
+        parent.empty().append(@el)
     else
       @$el.html html
       @delegateEvents()
