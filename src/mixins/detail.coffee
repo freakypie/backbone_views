@@ -26,15 +26,17 @@ class DetailMixin
 
     el = @$el.find selector
     if el.is ":input"
-      if el.is ":checkbox" or el.is ":radio"
+      type = el.attr "type"
+      if type == "checkbox" or type == "radio"
         el.prop "checked", @model.get name
-        el.on "change", (e) =>
-          @model.set name, el.prop "checked"
+        el.on "change click", (e) =>
+          @model.set (({})[name] = el.prop "checked")
+          # console.log "changed", @model.get("name"), name, @model.get name
           # TODO: validate and save?
       else
         el.val @model.get name
         el.on "change", (e) =>
-          @model.set name, el.val()
+          @model.set (({})[name] = el.val())
     else
       el.html @model.get name
 

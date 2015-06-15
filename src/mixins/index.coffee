@@ -57,7 +57,7 @@ class MixinView extends Backbone.View
     if @renderer
       @renderer context
     else if @template
-      console.log context
+      # console.log context
       @$el.html @template context
     @trigger "render:post"
     return this
@@ -78,6 +78,8 @@ class SelectorMixin
       # we will still have the selectors
       if not @_ui
         @_ui = _.clone @ui
+
+    @listenTo @, "render:post", @setupUI
 
   setupUI: () ->
     if @_ui
