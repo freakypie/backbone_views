@@ -7,7 +7,7 @@ mods = [
   require('./mixins/detail'),
   require('./mixins/composite'),
   require('./views/defaults'),
-  # require('./views/bootstrap'),
+  require('./views/bootstrap'),
   require('./models/base'),
 ]
 

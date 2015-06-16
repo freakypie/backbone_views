@@ -1,22 +1,20 @@
-index = require "../mixins/index"
-list = require "../mixins/list"
+index = require "./defaults"
 _ = require "underscore"
 
 
-
-class MenuItem extends index.views.MixinView
-  template: _.template '<li role="presentation">
+class MenuItem extends index.views.DetailView
+  el: '<li role="presentation">'
+  template: _.template '
     <a role="menuitem" tabindex="-1" href="<%= link %>">
       <%= label %>
-    </a>
-  </li>'
+    </a>'
 
 
-class Dropdown extends index.views.MixinView
-  mixins: [list.mixins.ListMixin]
+class Dropdown extends index.views.ListView
   itemViewClass: MenuItem
   listSelector: ".dropdown-menu"
-  template: _.template '<div class="dropdown">
+  el: "<div class='dropdown'>"
+  template: _.template '
     <button class="btn btn-default dropdown-toggle"
             type="button"
             id="<%= view_id %>"
@@ -27,7 +25,7 @@ class Dropdown extends index.views.MixinView
     </button>
     <ul class="dropdown-menu" role="menu" aria-labelledby="<%= view_id %>">
     </ul>
-  </div>'
+  '
 
   initialize: (options={}) ->
     super(options)
@@ -39,8 +37,25 @@ class Dropdown extends index.views.MixinView
     return super(context)
 
 
-class ListView extends index.views.MixinView
+class NavDropdown extends Dropdown
+  el: "<li class='dropdown'>"
+  template: _.template '
+    <a class="dropdown-toggle"
+            type="button"
+            id="<%= view_id %>"
+            data-toggle="dropdown"
+            aria-expanded="true">
+      <%= view_label %>
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="<%= view_id %>">
+    </ul>
+  '
+
+
 
 module.exports =
   views:
+    MenuItem: MenuItem
     Dropdown: Dropdown
+    NavDropdown: NavDropdown
