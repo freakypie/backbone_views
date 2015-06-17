@@ -39,7 +39,7 @@ class BaseCollection extends Backbone.Collection
 
   set: (data) ->
     # attempt to detect pagination
-    if "results" of data and "next" of data and "previous" of data
+    if _.isObject data
       @count = data.count
       @prev = data.previous
       @next = data.next
