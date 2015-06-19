@@ -43,3 +43,5 @@ describe "ListMixin", ->
     @view.$el.empty()
     @view.addAll()
     assert(@view.$el.children().length, 2)
+
+  xit "filters models"

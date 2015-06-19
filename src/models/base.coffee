@@ -5,6 +5,7 @@ Backbone = require "backbone"
 class BaseModel extends Backbone.Model
   trailingSlash: true
   apiRoot: ""
+  params: {}
   urlRoot: ""
 
   url: (extra) ->
@@ -17,7 +18,13 @@ class BaseModel extends Backbone.Model
       parts.push "" + @id
     if extra
       parts.push extra
-    return @addTrailingSlash parts.join "/"
+    retval = @addTrailingSlash parts.join "/"
+
+    if Object.keys(@params).length > 0
+      retval += "?"
+      retval += ("#{name}=#{value}" for name, value of @params).join("&")
+
+    return retval
 
   addTrailingSlash: (url) ->
     if url[url.length - 1] != "/" and @trailingSlash
@@ -30,6 +37,9 @@ class BaseModel extends Backbone.Model
   @setApiRoot: (url) ->
     @::apiRoot = url
 
+  @collection: ->
+    return BaseCollection.extends model: @
+
 
 class BaseCollection extends Backbone.Collection
 
@@ -39,12 +49,14 @@ class BaseCollection extends Backbone.Collection
   set: (data=null) ->
     # attempt to detect pagination
     if _.isObject(data) \
-    and "results" of data and "prev" of data and "next" of data
+    and "results" of data and "previous" of data and "next" of data
+      console.log "pagination"
       @count = data.count
       @prev = data.previous
       @next = data.next
       super(data.results)
     else
+      console.log "no pagination"
       super(data)
 
 
