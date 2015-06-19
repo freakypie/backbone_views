@@ -43,6 +43,8 @@ class DetailMixin
           data = {}
           data[name] = el.val()
           @model.set data
+    else if el.is "img"
+      el.attr "src", @model.get(name)
     else
       el.html @model.get name
 
