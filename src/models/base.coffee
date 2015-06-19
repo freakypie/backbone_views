@@ -38,7 +38,7 @@ class BaseCollection extends Backbone.Collection
 
   sync: () ->
     # attempt to detect pagination
-    if _.isObject data \
+    if _.isObject(data) \
     and "results" of data and "prev" of data and "next" of data
       @count = data.count
       @prev = data.previous
