@@ -36,7 +36,7 @@ class BaseCollection extends Backbone.Collection
   url: () ->
     return @model.prototype.url()
 
-  sync: () ->
+  set: (data=null) ->
     # attempt to detect pagination
     if _.isObject(data) \
     and "results" of data and "prev" of data and "next" of data
