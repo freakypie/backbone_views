@@ -24,6 +24,7 @@ describe "DetailMixin", ->
         <div>
           <input type='checkbox' id='check'>
           <input type='text' id='text'>
+          <input type='radio' data-radio id='radio'>
           <i id='i'></i>
           <div data-foo='1'></div>
         </div>
@@ -37,6 +38,7 @@ describe "DetailMixin", ->
       el: Backbone.$("<div id='detail'>")
       model: new Backbone.Model
         checkbox: true
+        radio: true
         textbox: "text is fun"
         italic: "italic"
         foo: "fun"
@@ -50,12 +52,15 @@ describe "DetailMixin", ->
     assert.equal @view.$el.find("#check").prop("checked"), true
     assert.equal @view.$el.find("#text").val(), "text is fun"
     assert.equal @view.$el.find("#i").html(), "italic"
+    assert.equal @view.$el.find("#radio").prop("checked"), true
 
   it "updates properties on change", ->
     Backbone.$("#check").prop("checked", false).trigger "change"
+    Backbone.$("#radio").prop("checked", false).trigger "change"
     Backbone.$("#text").val("awesome").trigger "change"
     Backbone.$("#i").html("checked")
 
+    assert.equal @view.model.get("radio"), false
     assert.equal @view.model.get("checkbox"), false
     assert.equal @view.model.get("textbox"), "awesome"
     assert.equal @view.model.get("italic"), "italic"  # didn't change

@@ -31,7 +31,7 @@ class FormMixin
     data = @getData()
     if data
       form = form.bind(data)
-        
+
     if @renderFunc
       html = form.toHTML(@renderFunc.bind(@))
     else
@@ -55,11 +55,9 @@ class FormMixin
         @formInvalid? form
 
   applyErrors: (errors) ->
-    console.log "applying errors", errors
     if _.isObject errors
       for name, errorlist of errors
         el = @$el.find("[name=#{name}]")
-        console.log el.get(0)
         el.siblings(@errorItemClass).remove()
         for error in errorlist
           el.before("<div class=\"#{@errorItemClass}\">#{error}</div>")

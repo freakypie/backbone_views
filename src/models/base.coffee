@@ -32,14 +32,14 @@ class BaseModel extends Backbone.Model
 
 
 class BaseCollection extends Backbone.Collection
-  model: null
 
   url: () ->
     return @model.prototype.url()
 
-  set: (data) ->
+  sync: () ->
     # attempt to detect pagination
-    if _.isObject data
+    if _.isObject data \
+    and "results" of data and "prev" of data and "next" of data
       @count = data.count
       @prev = data.previous
       @next = data.next
