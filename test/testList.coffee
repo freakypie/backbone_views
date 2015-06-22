@@ -20,6 +20,8 @@ describe "ListMixin", ->
     class TestItemView extends Backbone.View
       el: "<div class='item'>"
 
+    @TestItemView = TestItemView
+
     class TestView extends bv.views.MixinView
       mixins: [bv.mixins.ListMixin]
       itemViewClass: TestItemView
@@ -44,4 +46,11 @@ describe "ListMixin", ->
     @view.addAll()
     assert(@view.$el.children().length, 2)
 
-  xit "filters models"
+  it "destroys all subviews", ->
+    chai.spy.on(@TestItemView.prototype, "remove")
+    @view.remove()
+    assert.equal(@view.$el.children().length, 0)
+    assert.equal(@TestItemView::remove.__spy.calls.length, 2)
+
+  xit "filters newly added models", ->
+  xit "filters current models", ->

@@ -80,6 +80,11 @@ class ListMixin
       else
         @$el.find(@existsSelector).addClass @emptyToggleClass
 
+  remove: () ->
+    for cid, view of @views
+      view.remove()
+      delete @views[cid]
+
 
 module.exports =
   mixins:

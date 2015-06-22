@@ -50,13 +50,11 @@ class BaseCollection extends Backbone.Collection
     # attempt to detect pagination
     if _.isObject(data) \
     and "results" of data and "previous" of data and "next" of data
-      console.log "pagination"
       @count = data.count
       @prev = data.previous
       @next = data.next
       super(data.results)
     else
-      console.log "no pagination"
       super(data)
 
 

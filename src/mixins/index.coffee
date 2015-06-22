@@ -62,6 +62,12 @@ class MixinView extends Backbone.View
     @trigger "render:post"
     return this
 
+  remove: () ->
+    for mixin in @listMixins()
+      if mixin.remove
+        mixin.remove.apply(@)
+    super()
+
 
 ###
 selects items on the property `ui`
@@ -69,21 +75,12 @@ selects items on the property `ui`
 class SelectorMixin
 
   initialize: (options) ->
-    if options.ui
-      @ui = options.ui
-
-    if @ui
-      # copy the selectors
-      # when the template is rendered again
-      # we will still have the selectors
-      if not @_ui
-        @_ui = _.clone @ui
-
-    @listenTo @, "render:post", @setupUI
+    @listenTo @, "render:post", @setupUI.bind(@)
 
   setupUI: () ->
-    if @_ui
-      for name, selector of @_ui
+    if @.__proto__.ui
+      @ui = {}
+      for name, selector of @.__proto__.ui
         @ui[name] = @$el.find(selector)
 
 
