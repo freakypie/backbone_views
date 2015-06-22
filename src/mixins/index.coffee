@@ -35,7 +35,6 @@ class MixinView extends Backbone.View
     return @_mixins
 
   getContext: (context={}) ->
-
     if @model
       context.model = @model
       if @model.attributes

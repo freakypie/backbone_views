@@ -8,7 +8,7 @@ class BaseModel extends Backbone.Model
   params: {}
   urlRoot: ""
 
-  url: (extra) ->
+  url: (extra, params) ->
     parts = []
     if @apiRoot
       parts.push @apiRoot
@@ -20,9 +20,10 @@ class BaseModel extends Backbone.Model
       parts.push extra
     retval = @addTrailingSlash parts.join "/"
 
-    if Object.keys(@params).length > 0
+    if params or Object.keys(@params).length > 0
+      _.extend params, @params
       retval += "?"
-      retval += ("#{name}=#{value}" for name, value of @params).join("&")
+      retval += ("#{name}=#{value}" for name, value of params).join("&")
 
     return retval
 
@@ -37,25 +38,33 @@ class BaseModel extends Backbone.Model
   @setApiRoot: (url) ->
     @::apiRoot = url
 
-  @collection: ->
-    return BaseCollection.extends model: @
+  @collection: (extras) ->
+    console.log new @()
+    retval = BaseCollection.extend _.extend(model: @, extras)
+    retval = new retval()
+    console.log retval
+    return retval
 
 
 class BaseCollection extends Backbone.Collection
 
-  url: () ->
-    return @model.prototype.url()
+  url: (extra, params={}) ->
+    if @params
+      _.extend params, @params
+    return @model.prototype.url(extra, params)
 
-  set: (data=null) ->
+  parse: (data) ->
+    data = super(data)
+
     # attempt to detect pagination
     if _.isObject(data) \
     and "results" of data and "previous" of data and "next" of data
       @count = data.count
       @prev = data.previous
       @next = data.next
-      super(data.results)
-    else
-      super(data)
+      data = data.results
+
+    return data
 
 
 module.exports =
