@@ -78,9 +78,9 @@ class SelectorMixin
     @listenTo @, "render:post", @setupUI.bind(@)
 
   setupUI: () ->
-    if @.__proto__.ui
+    if @.constructor.prototype.ui
       @ui = {}
-      for name, selector of @.__proto__.ui
+      for name, selector of @.constructor.prototype.ui
         @ui[name] = @$el.find(selector)
 
 
