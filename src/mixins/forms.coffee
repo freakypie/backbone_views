@@ -31,7 +31,7 @@ class FormMixin
     data = @getData()
     if data
       form = form.bind(data)
-        
+
     if @renderFunc
       html = form.toHTML(@renderFunc.bind(@))
     else
