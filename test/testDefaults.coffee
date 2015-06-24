@@ -37,7 +37,7 @@ describe "ListView", ->
   beforeEach ->
 
     class TestView extends bv.views.ListView
-      collection: new TestCollection
+      collection: new TestCollection()
 
     @view = new TestView()
     @view.collection.add {text: "fun"}
@@ -45,9 +45,10 @@ describe "ListView", ->
     Backbone.$("body").append(@view.render().el)
 
   it "should be rendered nicely with defaults", ->
+    console.log @view.collection.length
     assert.equal(
       Backbone.$("body").html(),
-      '<div class="list"><div>fun</div></div>'
+      '<div><div class="list"><div>fun</div></div></div>'
     )
 
 

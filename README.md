@@ -37,7 +37,7 @@ your own.
 ### ListView
 Uses the `ListMixin` below and a `DetailView` to provide a functioning list.
 This view only requires that you give it a collection and it will make
-an auto managed list. You really should override the detail template at least.
+an auto managed list. 
 
 ### CreateView
 A simple view that uses the `FormMixin` to create and add a model to a

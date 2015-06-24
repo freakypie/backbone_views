@@ -11,7 +11,7 @@ class DetailView extends index.views.MixinView
     detail.mixins.SingleObjectMixin,
     detail.mixins.DetailMixin
   ]
-  template: _.template "<div><%= model.toString() %></div>"
+  template: _.template "<%= model.toString() %>"
 
 
 class ListView extends index.views.MixinView
@@ -35,11 +35,13 @@ class CreateView extends index.views.MixinView
         console.error "You must provide a either a model or " + \
           "collection use CreateView"
 
+  getData: () ->
+    return @model.attributes
+
   formValid: (form) ->
-    console.log "saving form"
     valid = @model.save(
       form.data,
-      success: @success.bind(@)
+      success: @success.bind(@, @model)
       error: (model, retval) =>
         console.log "failed to save", form, retval.responseJSON
         @formInvalid(form, retval.responseJSON)

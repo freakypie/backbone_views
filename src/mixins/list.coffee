@@ -8,6 +8,13 @@ class ListMixin
   emptySelector: ".empty"
   existsSelector: ".exists"
   emptyToggleClass: "hide"
+  filter: null
+  filterFunc: (model, filters) ->
+    if filters
+      for name, value of filters
+        if model.get(name) != value
+          return false
+    return true
 
   initialize: (options) ->
     @views = {}
@@ -16,6 +23,11 @@ class ListMixin
     @listenTo @collection, "remove", @removed
 
     @listenTo @, "render:post", @addAll
+
+  setFilter: (filter) ->
+    @filter = filter
+    # TODO: remove models that no longer match
+    # TODO: add models that are now matching
 
   getItemView: (model) ->
     return new @itemViewClass
@@ -33,10 +45,11 @@ class ListMixin
     return @listEl
 
   added: (model) ->
-    view = @getItemView model
-    @views[model.cid] = view
-    @getListElement().append view.render().el
-    @showEmpty()
+    if @filterFunc model, @filters
+      view = @getItemView model
+      @views[model.cid] = view
+      @getListElement().append view.render().el
+      @showEmpty()
 
   removed: (model) ->
     view = @views[model.cid]
@@ -66,6 +79,11 @@ class ListMixin
         @$el.find(@existsSelector).removeClass @emptyToggleClass
       else
         @$el.find(@existsSelector).addClass @emptyToggleClass
+
+  remove: () ->
+    for cid, view of @views
+      view.remove()
+      delete @views[cid]
 
 
 module.exports =

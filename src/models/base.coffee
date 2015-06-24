@@ -5,9 +5,10 @@ Backbone = require "backbone"
 class BaseModel extends Backbone.Model
   trailingSlash: true
   apiRoot: ""
+  params: {}
   urlRoot: ""
 
-  url: (extra) ->
+  url: (extra, params) ->
     parts = []
     if @apiRoot
       parts.push @apiRoot
@@ -17,7 +18,14 @@ class BaseModel extends Backbone.Model
       parts.push "" + @id
     if extra
       parts.push extra
-    return @addTrailingSlash parts.join "/"
+    retval = @addTrailingSlash parts.join "/"
+
+    if params or Object.keys(@params).length > 0
+      _.extend params, @params
+      retval += "?"
+      retval += ("#{name}=#{value}" for name, value of params).join("&")
+
+    return retval
 
   addTrailingSlash: (url) ->
     if url[url.length - 1] != "/" and @trailingSlash
@@ -30,22 +38,33 @@ class BaseModel extends Backbone.Model
   @setApiRoot: (url) ->
     @::apiRoot = url
 
+  @collection: (extras) ->
+    console.log new @()
+    retval = BaseCollection.extend _.extend(model: @, extras)
+    retval = new retval()
+    console.log retval
+    return retval
+
 
 class BaseCollection extends Backbone.Collection
-  model: null
 
-  url: () ->
-    return @model.prototype.url()
+  url: (extra, params={}) ->
+    if @params
+      _.extend params, @params
+    return @model.prototype.url(extra, params)
 
-  set: (data) ->
+  parse: (data) ->
+    data = super(data)
+
     # attempt to detect pagination
-    if "results" of data and "next" of data and "previous" of data
+    if _.isObject(data) \
+    and "results" of data and "previous" of data and "next" of data
       @count = data.count
       @prev = data.previous
       @next = data.next
-      super(data.results)
-    else
-      super(data)
+      data = data.results
+
+    return data
 
 
 module.exports =

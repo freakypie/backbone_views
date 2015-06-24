@@ -14,13 +14,16 @@ mods = [
 mixins = {}
 views = {}
 models = {}
+
 for mod in mods
   _.extend(mixins, mod.mixins)
   _.extend(views, mod.views)
   if mod.models
     _.extend(models, mod.models)
 
-module.exports =
+all = _.extend mixins, views, models
+
+module.exports = _.extend all,
   mixins: mixins
   views: views
   models: models
