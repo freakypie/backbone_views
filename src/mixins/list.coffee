@@ -23,6 +23,9 @@ class ListMixin
     @listenTo @collection, "remove", @removed
 
     @listenTo @, "render:post", @addAll
+    @listenTo @, "close", (e) =>
+      for id, view of @views
+        view.trigger("close", e)
 
   setFilter: (filter) ->
     @filter = filter
