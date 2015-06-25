@@ -49,9 +49,87 @@ class NavDropdown extends Dropdown
       <span class="caret"></span>
     </a>
     <ul class="dropdown-menu" role="menu" aria-labelledby="<%= view_id %>">
-    </ul>
-  '
+    </ul>'
 
+
+class Modal extends index.views.DetailView
+  el: '<div class="modal fade">'
+  template: _.template '
+    <div class="modal-dialog <%= classes %>">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close"
+                  data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title"><%= title %></h4>
+        </div>
+        <div class="modal-body">
+          <%= body %>
+        </div>
+        <%= buttons %>
+      </div>
+    </div>'
+
+  title: "Modal"
+  body: ""
+  # buttons:
+  #   close: "default"
+  classes: "modal-sm"
+
+  initialize: (options={}) ->
+    _.extend @, options
+
+    @listenTo @, "post:render", =>
+      @$el.modal()
+
+  getContext: (context) ->
+    super(context)
+    context.title = @title
+    context.classes = @classes
+    if _.isFunction @buttons
+      buttons = @buttons(context)
+    else
+      buttons = ""
+      for name, button of @buttons
+        buttons += "
+          <button type=\"button\"
+                  class=\"btn btn-#{button}\"
+                  data-dismiss=\"modal\">
+            #{name}
+          </button>"
+    if buttons
+      buttons = "<div class=\"modal-footer\">#{buttons}</div>"
+    context.buttons = buttons
+    if _.isFunction @body
+      body = @body(context)
+    else
+      body = @body
+    context.body = body
+    return context
+
+  show: () ->
+    @$el.modal("show")
+
+  hide: () ->
+    @$el.modal("hide")
+
+  remove: () ->
+    @$el.modal("destroy")
+
+  @create: (options) ->
+    modal = new Modal(options)
+    Backbone.$("body").append(modal.render().el)
+    modal.show()
+    return modal
+
+  @error: (options) ->
+    if options.title
+      options.title = "<i class='fa fa-exclamation-triangle'></i> " + \
+        options.title
+    @create _.defaults options,
+      title: "<i class='fa fa-exclamation-triangle'></i> Error"
+      classes: "modal-sm text-danger"
 
 
 module.exports =
@@ -59,3 +137,4 @@ module.exports =
     MenuItem: MenuItem
     Dropdown: Dropdown
     NavDropdown: NavDropdown
+    Modal: Modal
