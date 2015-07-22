@@ -4,6 +4,9 @@ _ = require("underscore")
 
 
 class MixinView extends Backbone.View
+  # intended to be set by the application
+  # to extend all existing views
+  global_mixins: []
   base_mixins: []
   mixins: []
 
@@ -22,12 +25,14 @@ class MixinView extends Backbone.View
       else
         console.error "Mixin is not valid", mixin
 
+    if @options.template
+      @template = @options.template
     @trigger("mixins:loaded", @)
 
   listMixins: () ->
     if not @_mixins
       @_mixins = []
-      for m in @mixins.concat @base_mixins
+      for m in @mixins.concat @base_mixins, @global_mixins
         if m
           @_mixins.push m.prototype
         else
@@ -58,6 +63,7 @@ class MixinView extends Backbone.View
       @renderer context
     else if @template
       @$el.html @template context
+    @delegateEvents()
     @trigger "render:post"
     return this
 
@@ -114,7 +120,6 @@ class NunjucksMixin
         parent.empty().append(@el)
     else
       @$el.html html
-      @delegateEvents()
 
     return this
 

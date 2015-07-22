@@ -73,3 +73,5 @@ describe "DetailMixin", ->
     assert.equal Backbone.$("#check").prop("checked"), false
     assert.equal Backbone.$("#text").val(), "awesome"
     assert.equal Backbone.$("#i").html(), "cool"
+
+  xit "works with subpanels (when in colliding namespaces)"

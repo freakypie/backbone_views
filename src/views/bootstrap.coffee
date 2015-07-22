@@ -76,11 +76,16 @@ class Modal extends index.views.DetailView
   # buttons:
   #   close: "default"
   classes: "modal-sm"
+  events:
+    "click .modal-footer button": "handleButton"
+    'click .close': 'handleCancel'
 
   initialize: (options={}) ->
     _.extend @, options
 
-    @listenTo @, "post:render", =>
+    @listenTo @, "render:post", =>
+      @$el.on "hidden.bs.modal", =>
+        @remove()
       @$el.modal()
 
   getContext: (context) ->
@@ -95,6 +100,7 @@ class Modal extends index.views.DetailView
         buttons += "
           <button type=\"button\"
                   class=\"btn btn-#{button}\"
+                  data-name=\"#{name}\"
                   data-dismiss=\"modal\">
             #{name}
           </button>"
@@ -108,6 +114,13 @@ class Modal extends index.views.DetailView
     context.body = body
     return context
 
+  handleButton: (e) ->
+    if @close
+      @close(Backbone.$(e.target).data("name"))
+
+  handleCancel: (e) ->
+    null
+
   show: () ->
     @$el.modal("show")
 
@@ -115,7 +128,8 @@ class Modal extends index.views.DetailView
     @$el.modal("hide")
 
   remove: () ->
-    @$el.modal("destroy")
+    console.error "removing modal"
+    super()
 
   @create: (options) ->
     modal = new Modal(options)

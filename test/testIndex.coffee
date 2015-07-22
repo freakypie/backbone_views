@@ -66,6 +66,8 @@ describe "MixinView", ->
   it "sends a context signal for additional context", ->
     assert.equal @view.getContext().listened, true
 
+  xit "can have global mixins installed"
+
 
 describe "SelectorMixin", ->
 

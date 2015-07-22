@@ -35,6 +35,7 @@ class ListMixin
   getItemView: (model) ->
     return new @itemViewClass
       model: model
+      parent: @
 
   getListElement: () ->
     if @listSelector

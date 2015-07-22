@@ -3,6 +3,7 @@ _ = require "underscore"
 
 class DetailMixin
   bindings: {}
+  detailSelector: null
   autoBind: (name) -> "[data-" + name + "]"
 
   initialize: (options) ->
@@ -11,6 +12,14 @@ class DetailMixin
 
   handleModelUpdate: () ->
     @bindAttributes Object.keys @model.changed
+
+  getSubPanel: () ->
+    if not @subpanel
+      if @detailSelector
+        @subpanel = @$el.find @detailSelector
+      else
+        @subpanel = @$el
+    return @subpanel
 
   bindAttributes: (attrs=null) ->
     if not attrs
@@ -27,7 +36,7 @@ class DetailMixin
     if not selector and @autoBind
       selector = @autoBind name
 
-    el = @$el.find selector
+    el = @getSubPanel().find selector
 
     if el.is ":input"
       type = el.attr "type"

@@ -39,11 +39,7 @@ class BaseModel extends Backbone.Model
     @::apiRoot = url
 
   @collection: (extras) ->
-    console.log new @()
-    retval = BaseCollection.extend _.extend(model: @, extras)
-    retval = new retval()
-    console.log retval
-    return retval
+    return new (BaseCollection.extend _.extend(model: @, extras))
 
 
 class BaseCollection extends Backbone.Collection
