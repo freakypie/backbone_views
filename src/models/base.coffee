@@ -43,7 +43,8 @@ class BaseModel extends Backbone.Model
 
 
 class BaseCollection extends Backbone.Collection
-
+  params: {}
+  
   url: (extra, params={}) ->
     if @params
       _.extend params, @params

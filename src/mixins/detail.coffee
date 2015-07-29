@@ -55,7 +55,22 @@ class DetailMixin
     else if el.is "img"
       el.attr "src", @model.get(name)
     else
-      el.html @model.get name
+      e = el
+      e.each (idx, e) =>
+        el = @.$(e)
+        action = el.data(name)
+        if action == "toggle"
+          if @model.get(name)
+            el.show()
+          else
+            el.hide()
+        else if action == "inverse-toggle"
+          if @model.get(name)
+            el.hide()
+          else
+            el.show()
+        else
+          el.html @model.get name
 
 
 class SingleObjectMixin

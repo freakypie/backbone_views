@@ -29,7 +29,8 @@ class Dropdown extends index.views.ListView
 
   initialize: (options={}) ->
     super(options)
-    @label = options.label
+    if options.label
+      @label = options.label
 
   getContext: (context) ->
     context.view_id = @cid
@@ -116,7 +117,10 @@ class Modal extends index.views.DetailView
 
   handleButton: (e) ->
     if @close
-      @close(Backbone.$(e.target).data("name"))
+      @close(
+        button: Backbone.$(e.target).data("name")
+        modal: @
+      )
 
   handleCancel: (e) ->
     null
@@ -128,7 +132,6 @@ class Modal extends index.views.DetailView
     @$el.modal("hide")
 
   remove: () ->
-    console.error "removing modal"
     super()
 
   @create: (options) ->
@@ -144,6 +147,14 @@ class Modal extends index.views.DetailView
     @create _.defaults options,
       title: "<i class='fa fa-exclamation-triangle'></i> Error"
       classes: "modal-sm text-danger"
+
+  @info: (options) ->
+    if options.title
+      options.title = "<i class='fa fa-exclamation-triangle'></i> " + \
+        options.title
+    @create _.defaults options,
+      title: "<i class='fa fa-exclamation-triangle'></i> Error"
+      classes: "modal-sm text-info"
 
 
 module.exports =
