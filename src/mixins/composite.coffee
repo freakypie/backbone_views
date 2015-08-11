@@ -1,27 +1,24 @@
 _ = require "underscore"
 
-
-class CompositeMixin
-  compositeSelector: ".views"
+class Composite
   views: {}
+  compost: {}
 
   initialize: (options) ->
     @listenTo @, "render:post", @renderViews
 
-  getViewOptions: (name) ->
-    return {}
-
-  createView: (name, klass) ->
-    options = @getViewOptions name
-    return new @klass(options)
+  createView: (options) ->
+    return new options.viewClass(options)
 
   renderViews: () ->
-    composite = @$el.find @compositeSelector
-    for name, klass of @views
-      composite.append(@createView(name, klass))
+    for selector, options of @views
+      options.el = selector
+      view = @createView(options)
+      @compost[selector] = view
+      view.render()
 
 
 module.exports =
   mixins:
-    Composite: CompositeMixin
+    Composite: Composite
   # views:

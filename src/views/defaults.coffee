@@ -18,7 +18,24 @@ class ListView extends index.views.MixinView
   base_mixins: [list.mixins.ListMixin]
   itemViewClass: DetailView
   listSelector: ".list"
+  listPaginatorSelector: ".pagination"
   template: _.template "<div class='list'></div>"
+  fetch: false
+  pagination: null
+
+  initialize: (options) ->
+    super(options)
+    if @fetch or options.fetch
+      @collection.fetch()
+
+    @listenTo @collection, "sync", ->
+      if @collection.meta and @pagination and not @paginationView
+        console.log @listPaginatorSelector
+        @paginationView = new @pagination(
+          collection: @collection
+          el: @$(@listPaginatorSelector).get(0)
+        )
+        @paginationView.render()
 
 
 class CreateView extends index.views.MixinView

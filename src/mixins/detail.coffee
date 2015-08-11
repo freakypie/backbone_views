@@ -58,7 +58,7 @@ class DetailMixin
       e = el
       e.each (idx, e) =>
         el = @.$(e)
-        action = el.data(name)
+        action = el.attr("data-#{name}")
         if action == "toggle"
           if @model.get(name)
             el.show()
@@ -69,6 +69,8 @@ class DetailMixin
             el.hide()
           else
             el.show()
+        else if action == "data"
+          el.data(name, @model.get(name))
         else
           el.html @model.get name
 

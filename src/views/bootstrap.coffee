@@ -1,4 +1,5 @@
 index = require "./defaults"
+base = require "../mixins/index"
 _ = require "underscore"
 
 
@@ -157,8 +158,128 @@ class Modal extends index.views.DetailView
       classes: "modal-sm text-info"
 
 
+class Pagination extends base.views.MixinView
+  range: 3
+  showPrevNext: false
+  showFirstLast: true
+  baseUrl: "/"
+  template: _.template '
+    <nav>
+      <ul class="pagination">
+        <li class="first">
+          <a href="#" aria-label="Previous">
+            <span aria-hidden="true"><i class="fa fa-step-backward"></i></span>
+          </a>
+        </li>
+        <li class="prev">
+          <a href="#" aria-label="Previous">
+            <span aria-hidden="true"><i class="fa fa-caret-left"></i></span>
+          </a>
+        </li>
+        <li class="next">
+          <a href="#" aria-label="Next">
+            <span aria-hidden="true"><i class="fa fa-caret-right"></i></span>
+          </a>
+        </li>
+        <li class="last">
+          <a href="#" aria-label="Next">
+            <span aria-hidden="true"><i class="fa fa-step-forward"></i></span>
+          </a>
+        </li>
+      </ul>
+    </nav>'
+
+  events:
+    "click .next a": "handleNext"
+    "click .prev a": "handlePrev"
+    "click .first a": "handleFirst"
+    "click .last a": "handleLast"
+    "click .page a": "handleClick"
+
+  render: (context) ->
+    super(context)
+
+    # decipher which pages should be shown
+    current = @collection.params.page or 1
+    max = @collection.meta.get("pages")
+    if max > 1
+      moreNext = false
+      morePrev = false
+      if max > @range * 2 + 1
+        start = current - @range
+        end = current + @range
+        moreNext = end < max
+        morePrev = start > 1
+        if start <= 0
+          end -= start
+          start = 1
+        if end > max
+          start -= (end - max)
+          end = max
+
+      # add in page links
+      insert = @$(".next")
+      if morePrev
+        insert.before("<li class=\"page\"><span>...</span></li>")
+      for page in [start..end]
+        active = page == current and "active" or ""
+        insert.before("<li class=\"page #{active}\">
+          <a href=\"#\" data-page=\"#{page}\">#{page}</a>
+        </li>")
+      if moreNext
+        insert.before("<li class=\"page\"><span>...</span></li>")
+
+      # show/hide controls
+      @$(".first,.last")[@showFirstLast and "removeClass" or "addClass"]("hide")
+      @$(".next,.prev")[@showNextPrev and "removeClass" or "addClass"]("hide")
+      @$el.removeClass "hide"
+    else
+      @$el.addClass "hide"
+    return @
+
+  handleClick: (e) ->
+    e.preventDefault()
+    @goto($(e.target).data("page"))
+
+  handleFirst: (e) ->
+    e.preventDefault()
+    @goto(1)
+
+  handlePrev: (e) ->
+    e.preventDefault()
+    @goto(Math.max(@collection.params.page - 1, 1))
+
+  handleNext: (e) ->
+    e.preventDefault()
+    @goto(Math.min(@collection.params.page + 1, @collection.meta.get("pages")))
+
+  handleLast: (e) ->
+    e.preventDefault()
+    @goto(@collection.meta.get("pages"))
+
+  goto: (page) ->
+    if not @loading
+      @loading = true
+      @oldPage = @collection.params.page or 1
+      @collection.params.page = page
+      @$(".page [data-page=#{page}]").html(
+        "<i class='fa fa-refresh fa-spin'></i>")
+      @collection.fetch
+        reset: true
+        success: =>
+          @render()
+          @url(page)
+          @loading = false
+        error: =>
+          @goto @oldPage
+
+  url: (page) ->
+    # customize this
+
+
 module.exports =
   views:
+    Pagination: Pagination
     MenuItem: MenuItem
     Dropdown: Dropdown
     NavDropdown: NavDropdown

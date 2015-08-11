@@ -18,6 +18,10 @@ class ListMixin
 
   initialize: (options) ->
     @views = {}
+
+    if @collection.params
+      @collection.params.page = options.page or 1
+
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "remove", @removed
@@ -88,6 +92,7 @@ class ListMixin
     for cid, view of @views
       view.remove()
       delete @views[cid]
+
 
 
 module.exports =
