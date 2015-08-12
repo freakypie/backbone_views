@@ -29,7 +29,8 @@ class Routing
 
     @_router = new Backbone.Router()
 
-    for url, opts of @routes
+    for url in Object.keys(@routes).reverse()
+      opts = @routes[url]
       if _.isFunction opts
         callback = opts
       else
@@ -66,9 +67,11 @@ class Routing
     # add in the view
     args = (a for a in arguments)
     options.args = args[1..args.length]
-    options.kwargs = _.object \
-      ([options.namedParams[i]?.substring(1), a] for i, a of options.args)
-    console.log options.kwargs
+    if options.namedParams
+      options.kwargs = _.object \
+        ([options.namedParams[i]?.substring(1), a] for i, a of options.args)
+    else
+      options.kwargs = {}
     @view = new options.viewClass(options)
     $(@routingSelector).append(@view.render().el)
 

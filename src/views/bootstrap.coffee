@@ -200,7 +200,7 @@ class Pagination extends base.views.MixinView
     super(context)
 
     # decipher which pages should be shown
-    current = @collection.params.page or 1
+    current = parseInt(@collection.params.page or 1)
     max = @collection.meta.get("pages")
     if max > 1
       moreNext = false

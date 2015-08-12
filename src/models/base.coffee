@@ -23,7 +23,11 @@ class BaseModel extends Backbone.Model
     if params or Object.keys(@params).length > 0
       _.extend params, @params
       retval += "?"
-      retval += ("#{name}=#{value}" for name, value of params).join("&")
+      bits = []
+      for name, value of params
+        if not (value is undefined)
+          bits.push("#{name}=#{value}")
+      retval += bits.join("&")
 
     return retval
 

@@ -30,13 +30,13 @@ class ListView extends index.views.MixinView
 
     @listenTo @collection, "sync", ->
       if @collection.meta and @pagination and not @paginationView
-        console.log @listPaginatorSelector
         @paginationView = new @pagination(
           collection: @collection
           el: @$(@listPaginatorSelector).get(0)
         )
         @paginationView.render()
-
+      else if @paginationView
+        @paginationView.render()
 
 class CreateView extends index.views.MixinView
   base_mixins: [form.mixins.AutoFormMixin, form.mixins.FormMixin]
