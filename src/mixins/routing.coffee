@@ -20,7 +20,7 @@ class Routing
   routingSelector: ".main"
 
   # how long switching a view should take
-  transitionDuration: 300
+  transitionDuration: 150
 
   routes: {}
 
@@ -47,22 +47,15 @@ class Routing
 
     if old
       # notify the old view that it is being transitioned out
-      old.trigger "routing:closing",
+      Backbone.trigger "routing:closing",
         router: @
+        view: old
         time: @transitionDuration
         reverse: options.reverse
 
       # remove after the transition is fully complete
       # we extend the time a little so the GPU can catch up before removal
       _.delay (-> old.remove()), @transitionDuration + 100
-
-    # notify the world, a new view is coming in
-    Backbone.trigger "routing:opening",
-      router: @
-      time: @transitionDuration
-      reverse: options.reverse
-      previousView: old
-      options: options
 
     # add in the view
     args = (a for a in arguments)
@@ -72,8 +65,23 @@ class Routing
         ([options.namedParams[i]?.substring(1), a] for i, a of options.args)
     else
       options.kwargs = {}
+
+    @getRouteOptions(options)
     @view = new options.viewClass(options)
     $(@routingSelector).append(@view.render().el)
+
+    # notify the world, a new view is coming in
+    Backbone.trigger "routing:opened",
+      router: @
+      time: @transitionDuration
+      reverse: options.reverse
+      previousView: old
+      options: options
+      view: @view
+
+
+  getRouteOptions: (options) ->
+    return options
 
 
 module.exports =

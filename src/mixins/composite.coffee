@@ -12,7 +12,7 @@ class Composite
 
   renderViews: () ->
     for selector, options of @views
-      options.el = selector
+      options.el = @$(selector)
       view = @createView(options)
       @compost[selector] = view
       view.render()

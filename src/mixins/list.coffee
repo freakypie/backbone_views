@@ -58,6 +58,8 @@ class ListMixin
       @views[model.cid] = view
       @getListElement().append view.render().el
       @showEmpty()
+      return view
+    return null
 
   removed: (model) ->
     view = @views[model.cid]
@@ -65,6 +67,7 @@ class ListMixin
       view.remove()
       delete @views[model.cid]
       @showEmpty()
+    return view
 
   addAll: () ->
     @listEl = @getListElement()
