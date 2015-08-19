@@ -23,7 +23,7 @@ class ListView extends index.views.MixinView
   fetch: false
   pagination: null
 
-  initialize: (options) ->
+  initialize: (options={}) ->
     super(options)
     if @fetch or options.fetch
       @collection.fetch()
