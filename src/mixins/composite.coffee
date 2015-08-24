@@ -7,13 +7,15 @@ class Composite
   initialize: (options) ->
     @listenTo @, "render:post", @renderViews
 
-  createView: (options) ->
-    return new options.viewClass(options)
+  createView: (viewClass, options) ->
+    # TODO: send a composite key?
+    return new viewClass(options)
 
   renderViews: () ->
-    for selector, options of @views
-      options.el = @$(selector)
-      view = @createView(options)
+    for selector, viewClass of @views
+      options =
+        el: @$(selector).get(0)
+      view = @createView(viewClass, options)
       @compost[selector] = view
       view.render()
 

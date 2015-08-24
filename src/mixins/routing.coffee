@@ -1,3 +1,4 @@
+index = require "./index"
 _ = require "underscore"
 
 
@@ -7,6 +8,7 @@ class Routing
     - routing:opening -- sent to Backbone before a view is created
     - routing:closing -- sent to old view, before it is closed
   ###
+  _is_router: true
 
   # will prefix all routes
   prefix: null
@@ -25,23 +27,46 @@ class Routing
   routes: {}
 
   initialize: (options={}) ->
-    @prefix = options.prefix? or ""
+    if not Backbone.History.started
+      @prefix = options.prefix or ""
+      if "*" in @prefix
+        @prefix = @prefix.split("*")[0]
 
-    @_router = new Backbone.Router()
+      @routers = {}
+      @_router = new Backbone.Router()
 
-    for url in Object.keys(@routes).reverse()
-      opts = @routes[url]
-      if _.isFunction opts
-        callback = opts
-      else
-        opts.router = @
-        opts.prefix = @prefix + url
-        opts.namedParams = opts.prefix.match(/:([a-z\-\_]+)/gi)
-        callback = @update.bind(@, opts)
-      @_router.route(@prefix + url, url, callback)
-      # @routes[options.router] opts
+      for url in Object.keys(@routes).reverse()
+        view = @routes[url]
+
+        # TODO: check if view is a backbone router
+
+        if view.prototype instanceof Backbone.View
+          prefix = @prefix + url
+
+          # is Routing Mixin?
+          if index.views.MixinView.listMixins(view).indexOf(Routing) > -1
+            @routers[url] = new view({router: @, prefix: prefix})
+
+          # normal class based view
+          opts = {router: @, viewClass: view, prefix: prefix}
+          console.log ">>>", opts.prefix
+          opts.namedParams = opts.prefix.match(/:([a-z\-\_]+)/gi)
+          callback = @update.bind(@, opts)
+
+        else if _.isFunction view
+          callback = view
+          console.log view
+
+        else
+          console.log "Nothing", view
+
+        console.log @prefix + url, url, callback
+        @_router.route(@prefix + url, callback)
+        console.log Backbone.history
+        # @routes[options.router] opts
 
   update: (options={}) ->
+    console.log("updating", options.viewClass, options)
     reverse = options.reverse
     old = @view
 
@@ -78,7 +103,6 @@ class Routing
       previousView: old
       options: options
       view: @view
-
 
   getRouteOptions: (options) ->
     return options

@@ -39,6 +39,18 @@ class MixinView extends Backbone.View
           console.error "Mixin is invalid"
     return @_mixins
 
+  @listMixins: (viewClass) ->
+    mixins = []
+    for m in viewClass::mixins.concat(
+      viewClass::base_mixins,
+      viewClass::global_mixins
+    )
+      if m
+        mixins.push m
+      else
+        console.error "Mixin is invalid"
+    return mixins
+
   getContext: (context={}) ->
     if @model
       context.model = @model
