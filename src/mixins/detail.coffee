@@ -17,14 +17,10 @@ class DetailMixin
       else
         opts.el.show()
     "pluralize": (opts) ->
-      if parseFloat(opts.value) == 1
-        opts.el.hide()
-      else
-        opts.el.show()
+      parseFloat(opts.value) == 1 and opts.el.hide() or opts.el.show()
     "data": (opts) ->
       opts.el.data(name, opts.value)
     "default": (opts) ->
-      console.log "default action", opts, @model
       opts.el.html opts.value
 
   initialize: (options) ->
@@ -81,7 +77,6 @@ class DetailMixin
         el = @.$(e)
         action = el.attr("data-#{name}") or "default"
         func = @dataActions[action]
-        console.log name, action, func
         opts = {el: el, name: name, value: @model.get(name)}
         if func
           func.bind(@)(opts)
