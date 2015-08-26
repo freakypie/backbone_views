@@ -80,10 +80,14 @@ class MixinView extends Backbone.View
     return this
 
   remove: () ->
+    cont = true
     for mixin in @listMixins()
       if mixin.remove
-        mixin.remove.apply(@)
-    super()
+        retval = mixin.remove.apply(@)
+        if retval == false
+          cont = false
+    if cont
+      super()
 
 
 ###

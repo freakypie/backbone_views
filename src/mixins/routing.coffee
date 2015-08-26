@@ -68,6 +68,7 @@ class Routing
   remove: () ->
     console.log "detaching element"
     $(@el).detach()
+    return false
 
   update: (options={}) ->
     reverse = options.reverse
