@@ -19,9 +19,28 @@ class DetailMixin
     "pluralize": (opts) ->
       parseFloat(opts.value) == 1 and opts.el.hide() or opts.el.show()
     "data": (opts) ->
-      opts.el.data(name, opts.value)
+      opts.el.data(opts.name, opts.value)
     "default": (opts) ->
-      opts.el.html opts.value
+      el = opts.el
+      name = opts.name
+      if el.is ":input"
+        type = el.attr "type"
+        if type == "checkbox" or type == "radio"
+          el.prop "checked", opts.value
+          el.on "change click", (e) =>
+            data = {}
+            data[name] = el.prop("checked")
+            @model.set data
+        else
+          el.val opts.value
+          el.on "change", (e) =>
+            data = {}
+            data[name] = el.val()
+            @model.set data
+      else if el.is "img"
+        el.attr "src", opts.value
+      else
+        el.html opts.value
 
   initialize: (options) ->
     @listenTo @model, "change", @handleModelUpdate
@@ -53,35 +72,15 @@ class DetailMixin
     if not selector and @autoBind
       selector = @autoBind name
 
-    el = @getSubPanel().find selector
-
-    if el.is ":input"
-      type = el.attr "type"
-      if type == "checkbox" or type == "radio"
-        el.prop "checked", @model.get name
-        el.on "change click", (e) =>
-          data = {}
-          data[name] = el.prop("checked")
-          @model.set data
+    @getSubPanel().find(selector).each (idx, e) =>
+      el = @.$(e)
+      action = el.attr("data-#{name}") or "default"
+      func = @dataActions[action]
+      opts = {el: el, name: name, value: @model.get(name)}
+      if func
+        func.bind(@)(opts)
       else
-        el.val @model.get name
-        el.on "change", (e) =>
-          data = {}
-          data[name] = el.val()
-          @model.set data
-    else if el.is "img"
-      el.attr "src", @model.get(name)
-    else
-      e = el
-      e.each (idx, e) =>
-        el = @.$(e)
-        action = el.attr("data-#{name}") or "default"
-        func = @dataActions[action]
-        opts = {el: el, name: name, value: @model.get(name)}
-        if func
-          func.bind(@)(opts)
-        else
-          @dataActions["default"].bind(@)(opts)
+        @dataActions["default"].bind(@)(opts)
 
 
 class SingleObjectMixin
