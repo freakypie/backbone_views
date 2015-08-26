@@ -8,7 +8,6 @@ class Routing
     - routing:opening -- sent to Backbone before a view is created
     - routing:closing -- sent to old view, before it is closed
   ###
-  _is_router: true
 
   # will prefix all routes
   prefix: null
@@ -19,7 +18,7 @@ class Routing
 
   # a selector to determine which part of this view should be updated
   # when the router picks up a URL change
-  routingSelector: ".main"
+  routingSelector: null
 
   # how long switching a view should take
   transitionDuration: 150
@@ -27,6 +26,8 @@ class Routing
   routes: {}
 
   initialize: (options={}) ->
+    @router = options.router
+
     if not Backbone.History.started
       @prefix = options.prefix or ""
       if "*" in @prefix
@@ -37,6 +38,7 @@ class Routing
 
       for url in Object.keys(@routes).reverse()
         view = @routes[url]
+        callback = null
 
         # TODO: check if view is a backbone router
 
@@ -45,31 +47,44 @@ class Routing
 
           # is Routing Mixin?
           if index.views.MixinView.listMixins(view).indexOf(Routing) > -1
-            @routers[url] = new view({router: @, prefix: prefix})
-
-          # normal class based view
-          opts = {router: @, viewClass: view, prefix: prefix}
-          console.log ">>>", opts.prefix
-          opts.namedParams = opts.prefix.match(/:([a-z\-\_]+)/gi)
-          callback = @update.bind(@, opts)
+            @routers[url] = new view
+              router: @,
+              prefix: prefix
+          else
+            # normal class based view
+            opts = {router: @, viewClass: view, prefix: prefix}
+            opts.namedParams = opts.prefix.match(/:([a-z\-\_]+)/gi)
+            callback = @update.bind(@, opts)
 
         else if _.isFunction view
           callback = view
-          console.log view
 
         else
-          console.log "Nothing", view
+          console.error "This view is not an view class or callback", view
 
-        console.log @prefix + url, url, callback
-        @_router.route(@prefix + url, callback)
-        console.log Backbone.history
-        # @routes[options.router] opts
+        if callback
+          @_router.route(@prefix + url, url, callback)
+
+  remove: () ->
+    console.log "detaching element"
+    $(@el).detach()
 
   update: (options={}) ->
-    console.log("updating", options.viewClass, options)
     reverse = options.reverse
-    old = @view
 
+    # attach the router if isn't attached
+    if not document.body.contains @el
+      if @router
+        @router.update
+          view: @
+          reverse: reverse
+      else
+        new Exception(
+          "Don't know how you want to attach this router to the dom.
+          Usually it is rendered and attached by another view or the main app"
+        )
+
+    old = @view
     if old
       # notify the old view that it is being transitioned out
       Backbone.trigger "routing:closing",
@@ -82,30 +97,42 @@ class Routing
       # we extend the time a little so the GPU can catch up before removal
       _.delay (-> old.remove()), @transitionDuration + 100
 
-    # add in the view
-    args = (a for a in arguments)
-    options.args = args[1..args.length]
-    if options.namedParams
-      options.kwargs = _.object \
-        ([options.namedParams[i]?.substring(1), a] for i, a of options.args)
-    else
-      options.kwargs = {}
+    if options.viewClass
+      # add in the view
+      args = (a for a in arguments)
+      options.args = args[1..args.length]
+      if options.namedParams
+        options.kwargs = _.object \
+          ([options.namedParams[i]?.substring(1), a] for i, a of options.args)
+      else
+        options.kwargs = {}
 
-    @getRouteOptions(options)
-    @view = new options.viewClass(options)
-    $(@routingSelector).append(@view.render().el)
+      @getRouteOptions(options)
+      view = new options.viewClass(options)
+    else
+      view = options.view
+
+    @getRoutingElement().append(view.render().el)
 
     # notify the world, a new view is coming in
     Backbone.trigger "routing:opened",
       router: @
       time: @transitionDuration
       reverse: options.reverse
-      previousView: old
+      previousView: @view
       options: options
-      view: @view
+      view: view
+
+    # now safe to set view
+    @view = view
 
   getRouteOptions: (options) ->
     return options
+
+  getRoutingElement: () ->
+    if @routingSelector
+      return $(@routingSelector)
+    return @$el
 
 
 module.exports =
