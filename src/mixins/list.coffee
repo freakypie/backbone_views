@@ -7,6 +7,7 @@ class ListMixin
   listSelector: null
   emptySelector: ".empty"
   existsSelector: ".exists"
+  loadingSelector: ".loading"
   emptyToggleClass: "hide"
   filter: null
   filterFunc: (model, filters) ->
@@ -25,6 +26,8 @@ class ListMixin
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "remove", @removed
+    @listenTo @collection, "request", @showLoading.bind(@, true)
+    @listenTo @collection, "sync", @showLoading.bind(@, false)
 
     @listenTo @, "render:post", @addAll
     @listenTo @, "close", (e) =>
@@ -79,17 +82,30 @@ class ListMixin
 
     @showEmpty()
 
+  showLoading: (value) ->
+    console.log "loading?", value
+    @loading = value
+    if not value
+      console.log "adding #{@emptyToggleClass}"
+      @$el.find(@loadingSelector).addClass @emptyToggleClass
+      @showEmpty()
+    else
+      console.log "remove #{@emptyToggleClass}"
+      @$el.find(@loadingSelector).removeClass @emptyToggleClass
+      @$el.find(@emptySelector).addClass @emptyToggleClass
+
   showEmpty: () ->
-    if @emptySelector
-      if @collection.length == 0
-        @$el.find(@emptySelector).removeClass @emptyToggleClass
-      else
-        @$el.find(@emptySelector).addClass @emptyToggleClass
-    if @existsSelector
-      if @collection.length > 0
-        @$el.find(@existsSelector).removeClass @emptyToggleClass
-      else
-        @$el.find(@existsSelector).addClass @emptyToggleClass
+    if not @loading
+      if @emptySelector
+        if @collection.length == 0
+          @$el.find(@emptySelector).removeClass @emptyToggleClass
+        else
+          @$el.find(@emptySelector).addClass @emptyToggleClass
+      if @existsSelector
+        if @collection.length > 0
+          @$el.find(@existsSelector).removeClass @emptyToggleClass
+        else
+          @$el.find(@existsSelector).addClass @emptyToggleClass
 
   remove: () ->
     for cid, view of @views
