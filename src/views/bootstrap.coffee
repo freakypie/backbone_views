@@ -183,10 +183,16 @@ class Pagination extends base.views.MixinView
         </li>
         <li class="last">
           <a href="#" aria-label="Next">
-            <span aria-hidden="true"><i class="fa fa-step-forward"></i></span>
+            <span aria-hidden="true">
+              <span class="page-text"></span>
+              <i class="fa fa-step-forward"></i>
+            </span>
           </a>
         </li>
       </ul>
+      <div>
+        Displaying <%= meta.start %> - <%= meta.end %> of <%= meta.count %>
+      </div>
     </nav>'
 
   events:
@@ -195,6 +201,16 @@ class Pagination extends base.views.MixinView
     "click .first a": "handleFirst"
     "click .last a": "handleLast"
     "click .page a": "handleClick"
+
+  getContext: (context) ->
+    page = @collection.params.page
+    context.meta = _.extend({}, @collection.meta.attributes)
+    context.meta.page = page
+    context.meta.start = @collection.params.page_size * (page - 1) + 1
+    context.meta.end = Math.min(
+      context.meta.count, @collection.params.page_size * (page))
+
+    return context
 
   render: (context) ->
     super(context)
@@ -232,6 +248,7 @@ class Pagination extends base.views.MixinView
       # show/hide controls
       @$(".first,.last")[@showFirstLast and "removeClass" or "addClass"]("hide")
       @$(".next,.prev")[@showNextPrev and "removeClass" or "addClass"]("hide")
+      # @$(".last .page-text").text(max)
       @$el.removeClass "hide"
     else
       @$el.addClass "hide"

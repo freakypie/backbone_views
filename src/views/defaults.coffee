@@ -21,22 +21,33 @@ class ListView extends index.views.MixinView
   listPaginatorSelector: ".pagination"
   template: _.template "<div class='list'></div>"
   fetch: false
+  params: null
   pagination: null
 
   initialize: (options={}) ->
     super(options)
+    if @params
+      for name, value of @params
+        @collection.params[name] = value
+
     if @fetch or options.fetch
       @collection.fetch()
 
+
     @listenTo @collection, "sync", ->
-      if @collection.meta and @pagination and not @paginationView
-        @paginationView = new @pagination(
-          collection: @collection
-          el: @$(@listPaginatorSelector).get(0)
-        )
-        @paginationView.render()
-      else if @paginationView
-        @paginationView.render()
+      console.log "page sync"
+      if @collection.meta and @pagination and not @paginationViews
+        @paginationViews = []
+        console.log "pagination"
+        for el in @$(@listPaginatorSelector).get()
+          console.log el
+          @paginationViews.push new @pagination(
+            collection: @collection
+            el: el
+          ).render()
+      else if @paginationViews
+        for view in @paginationViews
+          view.render()
 
 class CreateView extends index.views.MixinView
   base_mixins: [form.mixins.AutoFormMixin, form.mixins.FormMixin]

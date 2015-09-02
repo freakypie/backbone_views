@@ -29,7 +29,10 @@ class ListMixin
     @listenTo @collection, "request", @showLoading.bind(@, true)
     @listenTo @collection, "sync", @showLoading.bind(@, false)
 
-    @listenTo @, "render:post", @addAll
+    @listenTo @, "render:post", =>
+      @showLoading()
+      @addAll()
+
     @listenTo @, "close", (e) =>
       for id, view of @views
         view.trigger("close", e)
@@ -83,14 +86,12 @@ class ListMixin
     @showEmpty()
 
   showLoading: (value) ->
-    console.log "loading?", value
-    @loading = value
-    if not value
-      console.log "adding #{@emptyToggleClass}"
+    if value != undefined
+      @loading = value
+    if not @loading
       @$el.find(@loadingSelector).addClass @emptyToggleClass
       @showEmpty()
     else
-      console.log "remove #{@emptyToggleClass}"
       @$el.find(@loadingSelector).removeClass @emptyToggleClass
       @$el.find(@emptySelector).addClass @emptyToggleClass
 
