@@ -203,9 +203,9 @@ class Pagination extends base.views.MixinView
     "click .page a": "handleClick"
 
   getContext: (context) ->
-    page = @collection.params.page
+    page = @collection.params.page or 1
     context.meta = _.extend({}, @collection.meta.attributes)
-    context.meta.page = page or 1
+    context.meta.page = page
     context.meta.start = @collection.params.page_size * (page - 1) + 1
     context.meta.end = Math.min(
       context.meta.count, @collection.params.page_size * (page))
