@@ -232,6 +232,9 @@ class Pagination extends base.views.MixinView
         if end > max
           start -= (end - max)
           end = max
+      else
+        start = 1
+        end = max
 
       # add in page links
       insert = @$(".next")

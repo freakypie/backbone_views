@@ -8,6 +8,7 @@ class ListMixin
   emptySelector: ".empty"
   existsSelector: ".exists"
   loadingSelector: ".loading"
+  errorSelector: ".error"
   emptyToggleClass: "hide"
   filter: null
   filterFunc: (model, filters) ->
@@ -27,6 +28,7 @@ class ListMixin
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "remove", @removed
     @listenTo @collection, "request", @showLoading.bind(@, true)
+    @listenTo @collection, "error", @showError
     @listenTo @collection, "sync", @showLoading.bind(@, false)
 
     @listenTo @, "render:post", =>
@@ -85,6 +87,10 @@ class ListMixin
 
     @showEmpty()
 
+  showError: () ->
+    @showLoading(false)
+    @$el.find(@errorSelector).removeClass @emptyToggleClass
+
   showLoading: (value) ->
     if value != undefined
       @loading = value
@@ -93,6 +99,7 @@ class ListMixin
       @showEmpty()
     else
       @$el.find(@loadingSelector).removeClass @emptyToggleClass
+      @$el.find(@errorSelector).addClass @emptyToggleClass
       @$el.find(@emptySelector).addClass @emptyToggleClass
 
   showEmpty: () ->
