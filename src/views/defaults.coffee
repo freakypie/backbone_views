@@ -35,12 +35,9 @@ class ListView extends index.views.MixinView
 
 
     @listenTo @collection, "sync", ->
-      console.log "page sync"
       if @collection.meta and @pagination and not @paginationViews
         @paginationViews = []
-        console.log "pagination"
         for el in @$(@listPaginatorSelector).get()
-          console.log el
           @paginationViews.push new @pagination(
             collection: @collection
             el: el
