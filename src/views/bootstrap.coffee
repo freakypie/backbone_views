@@ -3,7 +3,7 @@ base = require "../mixins/index"
 _ = require "underscore"
 
 
-class MenuItem extends index.views.DetailView
+class MenuLink extends index.views.DetailView
   el: '<li role="presentation">'
   template: _.template '
     <a role="menuitem" tabindex="-1" href="<%= link %>">
@@ -11,8 +11,14 @@ class MenuItem extends index.views.DetailView
     </a>'
 
 
+class MenuItem extends index.views.DetailView
+  el: '<li role="presentation" class="dropdown-header">'
+  template: _.template '<%= label %>'
+
+
 class Dropdown extends index.views.ListView
-  itemViewClass: MenuItem
+  itemViewClass: MenuLink
+  itemNonLinkViewClass: MenuItem
   listSelector: ".dropdown-menu"
   el: "<div class='dropdown'>"
   template: _.template '
@@ -38,15 +44,24 @@ class Dropdown extends index.views.ListView
     context.view_label = @label
     return super(context)
 
+  getItemView: (model) ->
+    klass = @itemViewClass
+    if not model.get("link")
+      klass = @itemNonLinkViewClass
+    return new klass
+      model: model
+      parent: @
+
 
 class NavDropdown extends Dropdown
   el: "<li class='dropdown'>"
   template: _.template '
-    <a class="dropdown-toggle"
-            type="button"
-            id="<%= view_id %>"
-            data-toggle="dropdown"
-            aria-expanded="true">
+    <a href="#"
+       class="dropdown-toggle"
+       type="button"
+       id="<%= view_id %>"
+       data-toggle="dropdown"
+       aria-expanded="true">
       <%= view_label %>
       <span class="caret"></span>
     </a>
@@ -84,6 +99,9 @@ class Modal extends index.views.DetailView
 
   initialize: (options={}) ->
     _.extend @, options
+    if not @model
+      @model = new Backbone.Model()
+    super(options)
 
     @listenTo @, "render:post", =>
       @$el.on "hidden.bs.modal", =>
