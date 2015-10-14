@@ -21,7 +21,7 @@ class Routing
   routingSelector: null
 
   # how long switching a view should take
-  transitionDuration: 150
+  transitionDuration: 300
 
   routes: {}
 
@@ -96,7 +96,9 @@ class Routing
 
       # remove after the transition is fully complete
       # we extend the time a little so the GPU can catch up before removal
-      _.delay (-> old.remove()), @transitionDuration + 100
+      _.delay =>
+        old.remove()
+      , @transitionDuration + 100
 
     if options.viewClass
       # add in the view

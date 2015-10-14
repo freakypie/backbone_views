@@ -14,7 +14,10 @@ class ListMixin
   filterFunc: (model, filters) ->
     if filters
       for name, value of filters
-        if model.get(name) != value
+        if (
+          (not _.isFunction(value) and model.get(name) != value) or
+          not value(model.get(name))
+        )
           return false
     return true
 
