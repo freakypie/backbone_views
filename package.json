@@ -1,16 +1,17 @@
 {
   "name": "backbone_views",
-  "version": "0.4.7",
+  "version": "0.5.0",
   "description": "A collection of views similar to django views",
   "main": "lib/index.js",
   "scripts": {
     "prepublish": "coffee --output lib --compile src",
     "compile": "coffee --output lib --compile src",
+    "watch": "coffee --watch --output lib --compile src",
     "test": "mocha --compilers coffee:coffee-script/register"
   },
   "author": "",
   "license": "BSD-2-Clause",
-  "peerDependencies": {
+  "peerDependencies2": {
     "backbone": "~1.2.0",
     "forms": "^1.1.1",
     "underscore": "~1.8.3"

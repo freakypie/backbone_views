@@ -16,8 +16,9 @@ class Composite
       options =
         el: @$(selector).get(0)
       view = @createView(viewClass, options)
-      @compost[selector] = view
-      view.render()
+      if view
+        @compost[selector] = view
+        view.render()
 
 
 module.exports =

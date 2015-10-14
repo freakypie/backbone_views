@@ -20,6 +20,14 @@ class DetailMixin
       parseFloat(opts.value) == 1 and opts.el.hide() or opts.el.show()
     "data": (opts) ->
       opts.el.data(opts.name, opts.value)
+    "href": (opts) ->
+      opts.el.attr("href", opts.value)
+    "attr": (opts) ->
+      opts.el.attr(opts.args[0], opts.value)
+    "prop": (opts) ->
+      opts.el.prop(opts.args[0], opts.value)
+    "prop-inverse": (opts) ->
+      opts.el.prop(opts.args[0], not opts.value)
     "default": (opts) ->
       el = opts.el
       name = opts.name
@@ -75,8 +83,11 @@ class DetailMixin
     @getSubPanel().find(selector).each (idx, e) =>
       el = @.$(e)
       action = el.attr("data-#{name}") or "default"
+      args = action.split(":")
+      action = args[0]
+      args = args[1..]
       func = @dataActions[action]
-      opts = {el: el, name: name, value: @model.get(name)}
+      opts = {el: el, name: name, value: @model.get(name), args: args}
       if func
         func.bind(@)(opts)
       else
@@ -102,7 +113,6 @@ class SingleObjectMixin
         @model.id = options.id
         @model.fetch
           success: =>
-            console.log "fetched model"
             @trigger "view:model", @model
             @handleModelFetched(@model)
 
