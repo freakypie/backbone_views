@@ -1,4 +1,6 @@
 index = require "./defaults"
+base = require "../mixins/index"
+
 _ = require "underscore"
 
 
@@ -53,7 +55,7 @@ class NavDropdown extends Dropdown
     </ul>'
 
 
-class Modal extends index.views.DetailView
+class Modal extends base.views.MixinView
   el: '<div class="modal fade">'
   template: _.template '
     <div class="modal-dialog <%= classes %>">
@@ -82,6 +84,7 @@ class Modal extends index.views.DetailView
     'click .close': 'handleCancel'
 
   initialize: (options={}) ->
+    super(options)
     _.extend @, options
 
     @listenTo @, "render:post", =>
@@ -135,7 +138,7 @@ class Modal extends index.views.DetailView
     super()
 
   @create: (options) ->
-    modal = new Modal(options)
+    modal = new @(options)
     Backbone.$("body").append(modal.render().el)
     modal.show()
     return modal

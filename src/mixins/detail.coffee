@@ -92,7 +92,6 @@ class SingleObjectMixin
         @model.id = options.id
         @model.fetch
           success: =>
-            console.log "fetched model"
             @trigger "view:model", @model
             @handleModelFetched(@model)
 
