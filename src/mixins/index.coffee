@@ -39,6 +39,18 @@ class MixinView extends Backbone.View
           console.error "Mixin is invalid"
     return @_mixins
 
+  @listMixins: (viewClass) ->
+    mixins = []
+    for m in viewClass::mixins.concat(
+      viewClass::base_mixins,
+      viewClass::global_mixins
+    )
+      if m
+        mixins.push m
+      else
+        console.error "Mixin is invalid"
+    return mixins
+
   getContext: (context={}) ->
     if @model
       context.model = @model
@@ -68,10 +80,14 @@ class MixinView extends Backbone.View
     return this
 
   remove: () ->
+    cont = true
     for mixin in @listMixins()
       if mixin.remove
-        mixin.remove.apply(@)
-    super()
+        retval = mixin.remove.apply(@)
+        if retval == false
+          cont = false
+    if cont
+      super()
 
 
 ###

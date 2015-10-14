@@ -23,7 +23,11 @@ class BaseModel extends Backbone.Model
     if params or Object.keys(@params).length > 0
       _.extend params, @params
       retval += "?"
-      retval += ("#{name}=#{value}" for name, value of params).join("&")
+      bits = []
+      for name, value of params
+        if not (value is undefined)
+          bits.push("#{name}=#{value}")
+      retval += bits.join("&")
 
     return retval
 
@@ -43,8 +47,17 @@ class BaseModel extends Backbone.Model
 
 
 class BaseCollection extends Backbone.Collection
-  params: {}
-  
+  params: null
+  meta: null
+  pageSize: null
+
+  initialize: (options={}) ->
+    super(options)
+    if not @params
+      @params = {}
+    if options.pageSize
+      @params.page_size = options.pageSize
+
   url: (extra, params={}) ->
     if @params
       _.extend params, @params
@@ -56,9 +69,15 @@ class BaseCollection extends Backbone.Collection
     # attempt to detect pagination
     if _.isObject(data) \
     and "results" of data and "previous" of data and "next" of data
-      @count = data.count
-      @prev = data.previous
-      @next = data.next
+      if not @params.page_size
+        @params.page_size = data.results.length
+      @meta = new Backbone.Model()
+      @meta.set
+        count: data.count
+        pageSize: @params.page_size
+        pages: Math.ceil(data.count / @params.page_size)
+        prev: data.previous
+        next: data.next
       data = data.results
 
     return data

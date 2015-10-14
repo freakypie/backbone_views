@@ -7,6 +7,8 @@ class ListMixin
   listSelector: null
   emptySelector: ".empty"
   existsSelector: ".exists"
+  loadingSelector: ".loading"
+  errorSelector: ".error"
   emptyToggleClass: "hide"
   filter: null
   filterFunc: (model, filters) ->
@@ -18,11 +20,21 @@ class ListMixin
 
   initialize: (options) ->
     @views = {}
+
+    if @collection.params
+      @collection.params.page = options.page or 1
+
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "remove", @removed
+    @listenTo @collection, "request", @showLoading.bind(@, true)
+    @listenTo @collection, "error", @showError
+    @listenTo @collection, "sync", @showLoading.bind(@, false)
 
-    @listenTo @, "render:post", @addAll
+    @listenTo @, "render:post", =>
+      @showLoading()
+      @addAll()
+
     @listenTo @, "close", (e) =>
       for id, view of @views
         view.trigger("close", e)
@@ -63,6 +75,8 @@ class ListMixin
         else
           el.before(rendered)
       @showEmpty()
+      return view
+    return null
 
   removed: (model) ->
     view = @views[model.cid]
@@ -70,6 +84,7 @@ class ListMixin
       view.remove()
       delete @views[model.cid]
       @showEmpty()
+    return view
 
   addAll: () ->
     @listEl = @getListElement()
@@ -81,22 +96,39 @@ class ListMixin
 
     @showEmpty()
 
+  showError: () ->
+    @showLoading(false)
+    @$el.find(@errorSelector).removeClass @emptyToggleClass
+
+  showLoading: (value) ->
+    if value != undefined
+      @loading = value
+    if not @loading
+      @$el.find(@loadingSelector).addClass @emptyToggleClass
+      @showEmpty()
+    else
+      @$el.find(@loadingSelector).removeClass @emptyToggleClass
+      @$el.find(@errorSelector).addClass @emptyToggleClass
+      @$el.find(@emptySelector).addClass @emptyToggleClass
+
   showEmpty: () ->
-    if @emptySelector
-      if @collection.length == 0
-        @$el.find(@emptySelector).removeClass @emptyToggleClass
-      else
-        @$el.find(@emptySelector).addClass @emptyToggleClass
-    if @existsSelector
-      if @collection.length > 0
-        @$el.find(@existsSelector).removeClass @emptyToggleClass
-      else
-        @$el.find(@existsSelector).addClass @emptyToggleClass
+    if not @loading
+      if @emptySelector
+        if @collection.length == 0
+          @$el.find(@emptySelector).removeClass @emptyToggleClass
+        else
+          @$el.find(@emptySelector).addClass @emptyToggleClass
+      if @existsSelector
+        if @collection.length > 0
+          @$el.find(@existsSelector).removeClass @emptyToggleClass
+        else
+          @$el.find(@existsSelector).addClass @emptyToggleClass
 
   remove: () ->
     for cid, view of @views
       view.remove()
       delete @views[cid]
+
 
 
 module.exports =
