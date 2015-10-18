@@ -17,7 +17,14 @@ class MixinView extends Backbone.View
 
     for mixin in @listMixins()
       if mixin
-        _.defaults(@, mixin)
+
+        mixedup = {}
+        # this will make it possible to mixin babel objects
+        Object.getOwnPropertyNames(mixin).forEach((name) ->
+          if name != "constructor"
+            mixedup[name] = mixin[name]
+        )
+        _.defaults(@, mixedup)
         mixin.initialize?.apply(@, [options])
 
         if mixin.events

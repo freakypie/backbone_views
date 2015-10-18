@@ -71,7 +71,13 @@ class Routing
     return false
 
   update: (options={}) ->
-    reverse = options.reverse
+    reverse = false
+    if options.reverse != undefined
+      reverse = options.reverse
+    if Backbone.app.reverse != undefined
+      reverse = Backbone.app.reverse
+
+    console.log reverse, Backbone.app.reverse
 
     # attach the router if isn't attached
     if not document.body.contains @el
@@ -92,7 +98,7 @@ class Routing
         router: @
         view: old
         time: @transitionDuration
-        reverse: options.reverse
+        reverse: reverse
 
       # remove after the transition is fully complete
       # we extend the time a little so the GPU can catch up before removal
@@ -121,7 +127,7 @@ class Routing
     Backbone.trigger "routing:opened",
       router: @
       time: @transitionDuration
-      reverse: options.reverse
+      reverse: reverse
       previousView: @view
       options: options
       view: view
