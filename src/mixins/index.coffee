@@ -19,6 +19,7 @@ class MixinView extends Backbone.View
       if mixin
 
         mixedup = {}
+
         # this will make it possible to mixin babel objects
         Object.getOwnPropertyNames(mixin).forEach((name) ->
           if name != "constructor"
@@ -48,14 +49,15 @@ class MixinView extends Backbone.View
 
   @listMixins: (viewClass) ->
     mixins = []
-    for m in viewClass::mixins.concat(
+    allmixins = viewClass::mixins.concat(
       viewClass::base_mixins,
       viewClass::global_mixins
     )
+    for m in allmixins
       if m
         mixins.push m
       else
-        console.error "Mixin is invalid"
+        console.error "Mixin is invalid", viewClass, m, allmixins
     return mixins
 
   getContext: (context={}) ->
