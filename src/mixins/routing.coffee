@@ -57,7 +57,7 @@ class Routing
             callback = @update.bind(@, opts)
 
         else if _.isFunction view
-          callback = view
+          callback = view.bind(this)
 
         else
           console.error "This view is not an view class or callback", view
@@ -115,25 +115,29 @@ class Routing
           ([options.namedParams[i]?.substring(1), a] for i, a of options.args)
       else
         options.kwargs = {}
-
+      _.defaults options, {router: @}
       @getRouteOptions(options)
       view = new options.viewClass(options)
     else
       view = options.view
 
-    @getRoutingElement().append(view.render().el)
+    if view
+      @getRoutingElement().append(view.render().el)
 
-    # notify the world, a new view is coming in
-    Backbone.trigger "routing:opened",
-      router: @
-      time: @transitionDuration
-      reverse: reverse
-      previousView: @view
-      options: options
-      view: view
+      # notify the world, a new view is coming in
+      Backbone.trigger "routing:opened",
+        router: @
+        time: @transitionDuration
+        reverse: reverse
+        previousView: @view
+        options: options
+        view: view
 
-    # now safe to set view
-    @view = view
+      # now safe to set view
+      @view = view
+    else
+      console.warn("NO view given to router", options)
+      @view = null
 
   getRouteOptions: (options) ->
     return options

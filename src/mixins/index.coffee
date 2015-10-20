@@ -25,7 +25,7 @@ class MixinView extends Backbone.View
           if name != "constructor"
             mixedup[name] = mixin[name]
         )
-        _.defaults(@, mixedup)
+        _.defaults(@, mixin, mixedup)
         mixin.initialize?.apply(@, [options])
 
         if mixin.events
@@ -80,6 +80,7 @@ class MixinView extends Backbone.View
   render: (context={}) ->
     @trigger "render:pre"
     context = @getContext context
+    @undelegateEvents()
     if @renderer
       @renderer context
     else if @template
