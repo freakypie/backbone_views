@@ -81,6 +81,15 @@ class BaseCollection extends Backbone.Collection
 
     return data
 
+  getOrCreate: (filters, defaults={}, fetch=true) ->
+    instance = this.findWhere(filters)
+    if not instance
+      instance = new this.model(_.defaults(defaults, filters))
+      this.add(instance)
+      if fetch and instance.id
+        instance.fetch()
+    return instance
+
 
 module.exports =
   models:
