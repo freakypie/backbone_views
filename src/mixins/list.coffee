@@ -86,7 +86,7 @@ class ListMixin
     if view
       view.remove()
       delete @views[model.cid]
-      @showEmpty()
+      @showLoading()
     return view
 
   addAll: () ->

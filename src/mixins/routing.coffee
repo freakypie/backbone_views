@@ -120,19 +120,21 @@ class Routing
       view = options.view
 
     if view
-      @getRoutingElement().append(view.render().el)
+      view = view.render()
+      if view and view.el
+        @getRoutingElement().append(view.el)
 
-      # notify the world, a new view is coming in
-      Backbone.trigger "routing:opened",
-        router: @
-        time: @transitionDuration
-        reverse: reverse
-        previousView: @view
-        options: options
-        view: view
+        # notify the world, a new view is coming in
+        Backbone.trigger "routing:opened",
+          router: @
+          time: @transitionDuration
+          reverse: reverse
+          previousView: @view
+          options: options
+          view: view
 
-      # now safe to set view
-      @view = view
+        # now safe to set view
+        @view = view
     else
       console.warn("NO view given to router", options)
       @view = null
