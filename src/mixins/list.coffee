@@ -132,7 +132,21 @@ class ListMixin
       view.remove()
       delete @views[cid]
 
-
+  updateFilters: () ->
+    count = 0
+    for model in this.collection.models
+      if @filterFunc model, @filters
+        # if not added, add it
+        if not @views[model.cid]
+          this.added(model)
+        count += 1
+      else
+        # if added, remove it
+        view = @views[model.cid]
+        if view
+          view.remove()
+          delete @views[model.cid]
+    return count
 
 module.exports =
   mixins:
