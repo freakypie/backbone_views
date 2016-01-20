@@ -35,7 +35,6 @@ class ListMixin
     @listenTo @collection, "sync", @showLoading.bind(@, false)
 
     @listenTo @, "render:post", =>
-      @showLoading()
       @addAll()
 
     @listenTo @, "close", (e) =>
