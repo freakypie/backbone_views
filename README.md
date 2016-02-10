@@ -37,7 +37,7 @@ your own.
 ### ListView
 Uses the `ListMixin` below and a `DetailView` to provide a functioning list.
 This view only requires that you give it a collection and it will make
-an auto managed list. 
+an auto managed list.
 
 ### CreateView
 A simple view that uses the `FormMixin` to create and add a model to a
@@ -143,6 +143,20 @@ this model and the dom will be kept in sync
 By default it will autobind unbound attrs to "data-{{ name }}", but you
 can set the `autoBind` property to change it to something else or turn
 off this feature.
+
+You can further customize what bound elements will do by setting the
+"data-{{ name }}" value:
+
+  - toggle: display or hide depending on data value
+  - inverse-toggle: like toggle but inverted
+  - pluralize: shows element contents if value not 1
+  - data: sets a "data-" attribute instead of content
+  - href: sets the href instead of content
+  - attr: sets an attr instead of content
+  - prop: sets a property instead of content (booleans)
+  - prop-inverse: like prop but inverted
+
+by default it will replace the contents of the element
 
 ```coffeescript
 bv = require("backbone_views")
