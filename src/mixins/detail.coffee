@@ -66,6 +66,9 @@ class DetailMixin
     return @subpanel
 
   bindAttributes: (attrs=null) ->
+    # clear subpanel
+    @subpanel = undefined
+
     if not attrs
       if @model?.attributes
         attrs = Object.keys @model.attributes
