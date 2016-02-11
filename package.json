@@ -1,6 +1,6 @@
 {
   "name": "backbone_views",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "description": "A collection of views similar to django views",
   "main": "lib/index.js",
   "scripts": {
