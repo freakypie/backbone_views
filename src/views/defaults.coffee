@@ -2,7 +2,6 @@ index = require "../mixins/index"
 list = require "../mixins/list"
 detail = require "../mixins/detail"
 form = require "../mixins/forms"
-forms = require "forms"
 _ = require "underscore"
 
 
@@ -32,7 +31,6 @@ class ListView extends index.views.MixinView
 
     if @fetch or options.fetch
       @collection.fetch()
-
 
     @listenTo @collection, "sync", ->
       if @collection.meta and @pagination and not @paginationViews

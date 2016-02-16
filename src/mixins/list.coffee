@@ -66,7 +66,7 @@ class ListMixin
     if @filterFunc model, @filters
       view = @getItemView model
       @views[model.cid] = view
-      index = model.collection.indexOf model
+      index = @collection.indexOf model
       rendered = view.render().el
       if index == 0
         @getListElement().prepend(rendered)

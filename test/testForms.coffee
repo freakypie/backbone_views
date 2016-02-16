@@ -1,10 +1,10 @@
 bv = require "../src/index.coffee"
-forms = require "forms"
 jQuery = require "jquery"
 Backbone = require "backbone"
 _ = require "underscore"
 chai = require "chai"
 spies = require "chai-spies"
+forms = require "forms"
 
 require "./testBase"
 

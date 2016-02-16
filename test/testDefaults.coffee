@@ -1,5 +1,4 @@
 bv = require "../src/index.coffee"
-forms = require "forms"
 jQuery = require "jquery"
 Backbone = require "backbone"
 _ = require "underscore"
@@ -34,22 +33,25 @@ class TestCollection extends bv.models.BaseCollection
 
 describe "ListView", ->
 
-  beforeEach ->
-
-    class TestView extends bv.views.ListView
-      collection: new TestCollection()
-
-    @view = new TestView()
+  it "should be rendered nicely with defaults", ->
+    @view = new bv.views.ListView({collection: new TestCollection()})
     @view.collection.add {text: "fun"}
 
-    Backbone.$("body").append(@view.render().el)
+    Backbone.$("#content").empty().append(@view.render().el)
 
-  it "should be rendered nicely with defaults", ->
-    console.log @view.collection.length
     assert.equal(
-      Backbone.$("body").html(),
+      Backbone.$("#content").html(),
       '<div><div class="list"><div>fun</div></div></div>'
     )
+
+  it "shouldn't crash if model has not collection attr", ->
+    @view = new bv.views.ListView({collection: new TestCollection()})
+    model = @view.collection.add {text: "fun"}
+
+    # we had reports on our error tracker that this was happening
+    # don't know how it became null though
+    model.collection = null
+    @view.addAll()
 
 
 describe "DetailView", ->
@@ -61,11 +63,11 @@ describe "DetailView", ->
 
     @view = new TestView()
 
-    Backbone.$("body").append(@view.render().el)
+    Backbone.$("#content").empty().append(@view.render().el)
 
   it "should be rendered nicely with defaults", ->
     assert.equal(
-      Backbone.$("body").html(),
+      Backbone.$("#content").html(),
       '<div>fun</div>'
     )
 
