@@ -90,6 +90,32 @@ class BaseCollection extends Backbone.Collection
         instance.fetch()
     return instance
 
+  fetchAllPages: (page=1) ->
+    """ Recursively fetch all pages starting at the given page """
+    return new Promise (resolve, reject) =>
+      @fetchPage(page)
+        .then =>
+          page += 1
+          if page <= @meta.get("pages")
+            @fetchAllPages(page).then ->
+              resolve()
+            .catch(reject)
+          else
+            resolve()
+        .catch (ex) ->
+          reject(ex)
+
+  fetchPage: (page) ->
+    return new Promise (resolve, reject) =>
+      if not @params
+        @params = {}
+      @params.page = page
+      @fetch({
+        remove: false,
+        success: (retval) ->
+          resolve()
+      })
+
 
 module.exports =
   models:

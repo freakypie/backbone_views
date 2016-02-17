@@ -55,11 +55,34 @@ describe "BaseCollection", ->
     class TestModel extends bv.models.BaseModel
       urlRoot: "slugs"
 
-    class TestCollection extends bv.models.BaseModel
+    class TestCollection extends bv.models.BaseCollection
       urlRoot: "slugs"
       model: TestModel
 
     @collection = new TestCollection
 
   it "should use the basemodel's urlroot", ->
-    assert.equal(@collection.url(), "http://boo.com/slugs/")
+    assert.equal(@collection.url(), "http://boo.com/slugs/?")
+
+  it "should get all pages of models", (done) ->
+    id_number = 1
+    Backbone.sync = (method, model, options) ->
+      options.success?({
+        count: 6,
+        page_size: 2,
+        results: [
+            {id: id_number + 1, name: "candy"},
+            {id: id_number, name: "candy"}
+        ],
+        previous: null,
+        next: null,
+      }, {})
+
+      id_number += 2
+
+    @collection.fetchAllPages().then =>
+      assert.equal(@collection.length, 6)
+      done()
+    .catch ->
+      assert.fail()
+      done()

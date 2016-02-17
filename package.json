@@ -7,7 +7,8 @@
     "prepublish": "coffee --output lib --compile src",
     "compile": "coffee --output lib --compile src",
     "watch": "coffee --watch --output lib --compile src",
-    "test": "mocha --compilers coffee:coffee-script/register"
+    "test_watch": "mocha --compilers coffee:coffee-script/register  --reporter list -w",
+    "test": "mocha --compilers coffee:coffee-script/register --reporter nyan"
   },
   "author": "",
   "license": "BSD-2-Clause",
