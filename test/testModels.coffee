@@ -61,6 +61,14 @@ describe "BaseCollection", ->
 
     @collection = new TestCollection
 
+  it "should have a correct assumption", ->
+    @collection.add({foo: 1, bar: 1})
+    @collection.add({foo: 2, bar: 1})
+    assert.equal(@collection.where({bar: 1}).length, 2)
+
+    # can't put functions in here
+    #assert.equal(@collection.where({foo: (v) -> v == 2}).length, 1)
+
   it "should use the basemodel's urlroot", ->
     assert.equal(@collection.url(), "http://boo.com/slugs/?")
 
