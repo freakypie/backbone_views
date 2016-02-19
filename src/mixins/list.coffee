@@ -115,13 +115,18 @@ class ListMixin
 
   showEmpty: () ->
     if not @loading
+      count = null
+      if @emptySelector or @existsSelector
+        count = @count()
+
       if @emptySelector
-        if @collection.length == 0
-          @$el.find(@emptySelector).removeClass @emptyToggleClass
+        if count == 0
+          @$(@emptySelector).removeClass @emptyToggleClass
         else
-          @$el.find(@emptySelector).addClass @emptyToggleClass
+          @$(@emptySelector).addClass @emptyToggleClass
+
       if @existsSelector
-        if @collection.length > 0
+        if count > 0
           @$el.find(@existsSelector).removeClass @emptyToggleClass
         else
           @$el.find(@existsSelector).addClass @emptyToggleClass
@@ -145,6 +150,13 @@ class ListMixin
         if view
           view.remove()
           delete @views[model.cid]
+    return count
+
+  count: () ->
+    count = 0
+    for model in this.collection.models
+      if @filterFunc model, @filters
+        count += 1
     return count
 
 module.exports =

@@ -69,7 +69,8 @@ class BaseCollection extends Backbone.Collection
     # attempt to detect pagination
     if _.isObject(data) \
     and "results" of data and "previous" of data and "next" of data
-      @meta = new Backbone.Model()
+      if not @meta
+        @meta = new Backbone.Model()
       page_size = @params.page_size or data.results.length
       @meta.set
         count: data.count
