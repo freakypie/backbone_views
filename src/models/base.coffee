@@ -97,7 +97,7 @@ class BaseCollection extends Backbone.Collection
       @fetchPage(page)
         .then =>
           page += 1
-          if page <= @meta.get("pages")
+          if @meta and page <= @meta.get("pages")
             @fetchAllPages(page).then ->
               resolve()
             .catch(reject)
