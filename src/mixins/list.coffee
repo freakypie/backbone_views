@@ -29,6 +29,9 @@ class ListMixin
 
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
+    @listenTo @collection, "sort", ->
+      @empty()
+      @addAll()
     @listenTo @collection, "remove", @removed
     @listenTo @collection, "request", @showLoading.bind(@, true)
     @listenTo @collection, "error", @showError
@@ -61,6 +64,9 @@ class ListMixin
     else
       @listEl = @$el
     return @listEl
+
+  empty: () ->
+    @getListElement().empty()
 
   added: (model) ->
     if @filterFunc model, @filters
