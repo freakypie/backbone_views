@@ -30,8 +30,9 @@ class ListMixin
     @listenTo @collection, "add", @added
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "sort", ->
-      @empty()
-      @addAll()
+      # @empty()
+      # @addAll()
+      @sort()
     @listenTo @collection, "remove", @removed
     @listenTo @collection, "request", @showLoading.bind(@, true)
     @listenTo @collection, "error", @showError
@@ -64,6 +65,16 @@ class ListMixin
     else
       @listEl = @$el
     return @listEl
+
+  sort: () ->
+    for model in @collection.models
+      if @filterFunc model, @filters
+        view = @views[model.cid]
+        index = @collection.indexOf model
+        current = view.$el.index()
+        if index != current
+          el = @getListElement().children().eq(index)
+          el.before(view.$el.detach())
 
   empty: () ->
     @getListElement().empty()
