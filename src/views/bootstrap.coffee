@@ -75,13 +75,17 @@ class Modal extends base.views.MixinView
   template: _.template '
     <div class="modal-dialog <%= classes %>">
       <div class="modal-content">
+        <% if (showHeader) { %>
         <div class="modal-header">
+          <% if (showCloseButton) { %>
           <button type="button" class="close"
                   data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
+          <% } // show close %>
           <h4 class="modal-title"><%= title %></h4>
         </div>
+        <% } // show header %>
         <div class="modal-body">
           <%= body %>
         </div>
@@ -94,9 +98,12 @@ class Modal extends base.views.MixinView
   # buttons:
   #   close: "default"
   classes: "modal-sm"
+  showCloseButton: true
+  showHeader: true
   events:
     "click .modal-footer button": "handleButton"
     'click .close': 'handleCancel'
+  modalOptions: {}
 
   initialize: (options={}) ->
     super(options)
@@ -108,10 +115,12 @@ class Modal extends base.views.MixinView
     @listenTo @, "render:post", =>
       @$el.on "hidden.bs.modal", =>
         @remove()
-      @$el.modal()
+      @$el.modal(this.modalOptions)
 
   getContext: (context) ->
     super(context)
+    context.showHeader = @showHeader
+    context.showCloseButton = @showCloseButton
     context.title = @title
     context.classes = @classes
     if _.isFunction @buttons
@@ -155,17 +164,20 @@ class Modal extends base.views.MixinView
   remove: () ->
     super()
 
+  open: () ->
+    Backbone.$("body").append(this.render().el)
+    this.show()
+
   @create: (options) ->
     modal = new @(options)
-    Backbone.$("body").append(modal.render().el)
-    modal.show()
+    modal.open()
     return modal
 
   @error: (options) ->
     if options.title
       options.title = "<i class='fa fa-exclamation-triangle'></i> " + \
         options.title
-    @create _.defaults options,
+    return @create _.defaults options,
       title: "<i class='fa fa-exclamation-triangle'></i> Error"
       classes: "modal-sm text-danger"
 
@@ -176,6 +188,19 @@ class Modal extends base.views.MixinView
     @create _.defaults options,
       title: "<i class='fa fa-exclamation-triangle'></i> Error"
       classes: "modal-sm text-info"
+
+
+class CompositeModal extends Modal
+
+  initialize: (options) ->
+    super(options)
+    this.view = options.view
+    this.listenTo this, "render:post", ->
+      this.$(".modal-body").append(this.view.render().el);
+
+  remove: () ->
+    this.view.remove()
+    super()
 
 
 class Pagination extends base.views.MixinView
@@ -324,3 +349,4 @@ module.exports =
     Dropdown: Dropdown
     NavDropdown: NavDropdown
     Modal: Modal
+    CompositeModal: CompositeModal

@@ -31,7 +31,7 @@ class MixinView extends Backbone.View
         if mixin.events
           @events = _.defaults(@events or {}, mixin.events)
       else
-        console.error "Mixin is not valid", mixin
+        console.error "Mixin is not valid", mixin, this
 
     if @options.template
       @template = @options.template

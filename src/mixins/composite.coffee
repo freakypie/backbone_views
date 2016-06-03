@@ -14,6 +14,7 @@ class Composite
   renderViews: () ->
     for selector, viewClass of @views
       options =
+        selector: selector
         el: @$(selector).get(0)
       view = @createView(viewClass, options)
       if view
