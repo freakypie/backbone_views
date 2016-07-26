@@ -10,7 +10,7 @@ class ListMixin
   loadingSelector: ".loading"
   errorSelector: ".error"
   emptyToggleClass: "hide"
-  filter: null
+  filters: null
   filterFunc: (model, filters) ->
     if filters
       for name, value of filters
@@ -22,12 +22,15 @@ class ListMixin
     return true
 
   initialize: (options) ->
+    if not @collection and not options.collection
+      @collection = this.getCollection(options)
     @views = {}
 
     if @collection.params
       @collection.params.page = options.page or 1
 
-    @listenTo @collection, "add", @added
+    @listenTo @collection, "add", (m) =>
+      @added(m)
     @listenTo @collection, 'reset', @addAll
     @listenTo @collection, "sort", ->
       # @empty()
@@ -45,10 +48,12 @@ class ListMixin
       for id, view of @views
         view.trigger("close", e)
 
-  setFilter: (filter) ->
-    @filter = filter
-    # TODO: remove models that no longer match
-    # TODO: add models that are now matching
+  getCollection: () ->
+    return undefined
+
+  setFilters: (filters) ->
+    @filters = filters
+    @updateFilters()
 
   getItemView: (model) ->
     return new @itemViewClass
@@ -67,33 +72,45 @@ class ListMixin
     return @listEl
 
   sort: () ->
+    included = []
+    index = 0
     for model in @collection.models
       if @filterFunc model, @filters
-        view = @views[model.cid]
-        index = @collection.indexOf model
-        current = view.$el.index()
-        if index != current
-          el = @getListElement().children().eq(index)
-          el.before(view.$el.detach())
+        model.index = index
+        included.push(model)
+        index += 1
+
+    for model in included
+      view = @views[model.cid]
+      current = view.$el.index()
+      if model.index != current
+        el = @getListElement().children().eq(model.index)
+        el.before(view.$el.detach())
 
   empty: () ->
     @getListElement().empty()
 
-  added: (model) ->
+  added: (model, container) ->
     if @filterFunc model, @filters
+      skipShowEmpty = container == undefined
+      if not container
+        container = @getListElement().get(0)
       view = @getItemView model
       @views[model.cid] = view
       index = @collection.indexOf model
       rendered = view.render().el
-      if index == 0
-        @getListElement().prepend(rendered)
+
+      if not container.childNodes
+        container.appendChild(rendered)
       else
-        el = @getListElement().children().eq(index)
-        if el.length == 0
-          @getListElement().append(rendered)
+        el = container.childNodes[index]
+        if el
+          container.insertBefore(rendered, el)
         else
-          el.before(rendered)
-      @showEmpty()
+          container.appendChild(rendered)
+
+      if not skipShowEmpty
+        @showEmpty()
       return view
     return null
 
@@ -110,8 +127,11 @@ class ListMixin
     @listEl.empty()
     @views = {}
     if @collection.length > 0
+      container = document.createDocumentFragment()
       for model in @collection.models
-        @added model
+        @added model, container
+      if container
+        @getListElement().append(container)
 
     @showEmpty()
 

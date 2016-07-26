@@ -98,11 +98,12 @@ class DetailMixin
 
 
 class SingleObjectMixin
+  fetch: true
 
   initialize: (options) ->
     if not @model
-      if not options.id
-        console.error "No model id found on this view"
+      if not options.id and not options.filters
+        console.error "No model id or model filters found on this view", options
         return
 
       if not @collection
@@ -110,16 +111,28 @@ class SingleObjectMixin
         console.error "options", options
         return
 
-      @model = @collection.get(options.id)
+      if options.id
+        options.filters = {id: options.id}
+
+      @model = @collection.findWhere(options.filters)
+
       if not @model
         @model = new @collection.model
-        @model.id = options.id
-        @model.fetch
-          success: =>
-            @trigger "view:model", @model
-            @handleModelFetched(@model)
+        @model.set(options.filters)
 
-        @collection.add @model
+        if @fetch
+          @model.fetch
+            success: =>
+              @trigger "view:model", @model
+              @handleModelFetched(@model)
+
+          @collection.add @model
+        else
+          @listenTo @collection, "update", =>
+            model = @collection.findWhere(options.filters)
+            if model
+              this.model.set(model.attributes)
+
 
   handleModelFetched: (model) ->
     @render()

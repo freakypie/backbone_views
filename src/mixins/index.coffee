@@ -12,8 +12,7 @@ class MixinView extends Backbone.View
 
   initialize: (options={}) ->
     @options = options
-    if @options.mixins
-      @mixins = options.mixins
+    _.extend(@, options)
 
     for mixin in @listMixins()
       if mixin

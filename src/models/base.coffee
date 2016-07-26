@@ -91,6 +91,29 @@ class BaseCollection extends Backbone.Collection
         instance.fetch()
     return instance
 
+  ###
+    Gets a model or returns a stub model
+
+    When data becomes available later,
+    the stub will be updated if a match is found
+  ###
+  getOrStub: (filters, defaults={}) ->
+    instance = this.findWhere(filters)
+    if not instance
+      instance = new this.model(_.defaults(defaults, filters))
+
+      # if we are finding with an id
+      # we can add to the collection and it should auto update
+      if instance.id
+        this.add(instance)
+      else
+        # if we don't have an id, we manually update
+        instance.listenTo this, "update", =>
+          instance2 = this.findWhere(filters)
+          if instance2
+            instance.set(instance2.attributes)
+    return instance
+
   fetchAllPages: (page=1) ->
     """ Recursively fetch all pages starting at the given page """
     return new Promise (resolve, reject) =>

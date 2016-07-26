@@ -100,9 +100,10 @@ class Routing
 
       # remove after the transition is fully complete
       # we extend the time a little so the GPU can catch up before removal
-      _.delay =>
-        old.remove()
-      , @transitionDuration + 100
+      requestAnimationFrame =>
+        _.delay =>
+          old.remove()
+        , @transitionDuration + 100
 
     if options.viewClass
       # add in the view
@@ -120,21 +121,22 @@ class Routing
       view = options.view
 
     if view
-      view = view.render()
-      if view and view.el
-        @getRoutingElement().append(view.el)
+      requestAnimationFrame =>
+        view = view.render()
+        if view and view.el
+          @getRoutingElement().append(view.el)
 
-        # notify the world, a new view is coming in
-        Backbone.trigger "routing:opened",
-          router: @
-          time: @transitionDuration
-          reverse: reverse
-          previousView: @view
-          options: options
-          view: view
+          # notify the world, a new view is coming in
+          Backbone.trigger "routing:opened",
+            router: @
+            time: @transitionDuration
+            reverse: reverse
+            previousView: @view
+            options: options
+            view: view
 
-        # now safe to set view
-        @view = view
+          # now safe to set view
+          @view = view
     else
       console.warn("NO view given to router", options)
       @view = null
