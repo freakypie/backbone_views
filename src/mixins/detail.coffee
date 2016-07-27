@@ -102,7 +102,7 @@ class SingleObjectMixin
 
   initialize: (options) ->
     if not @model
-      if not options.id and not options.filters
+      if not options.id and not @filters
         console.error "No model id or model filters found on this view", options
         return
 
@@ -111,14 +111,14 @@ class SingleObjectMixin
         console.error "options", options
         return
 
-      if options.id
-        options.filters = {id: options.id}
+      if @id
+        @filters = {id: @id}
 
-      @model = @collection.findWhere(options.filters)
+      @model = @collection.findWhere(@filters)
 
       if not @model
         @model = new @collection.model
-        @model.set(options.filters)
+        @model.set(@filters)
 
         if @fetch
           @model.fetch
@@ -129,7 +129,7 @@ class SingleObjectMixin
           @collection.add @model
         else
           @listenTo @collection, "update", =>
-            model = @collection.findWhere(options.filters)
+            model = @collection.findWhere(@filters)
             if model
               this.model.set(model.attributes)
 
