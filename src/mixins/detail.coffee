@@ -2,7 +2,7 @@ _ = require "underscore"
 
 
 class DetailMixin
-  bindings: {}
+  bindings: null
   detailSelector: null
   autoBind: (name) -> "[data-" + name + "]"
   dataActions:
@@ -75,22 +75,26 @@ class DetailMixin
       else
         attrs = []
 
-    for name in attrs
-      @bindAttribute name
+    if @bindings
+      for name in Object.keys(@bindings)
+        @bindAttribute name
+    else
+      for name in attrs
+        @bindAttribute name
 
   bindAttribute: (name) ->
-    selector = @bindings[name]
+    selector = @bindings?[name]
     if not selector and @autoBind
       selector = @autoBind name
 
     @getSubPanel().find(selector).each (idx, e) =>
       el = @.$(e)
       action = el.attr("data-#{name}") or "default"
-      args = action.split(":")
-      action = args[0]
-      args = args[1..]
+      # args = action.split(":")
+      # action = args[0]
+      # args = args[1..]
       func = @dataActions[action]
-      opts = {el: el, name: name, value: @model.get(name), args: args}
+      opts = {el: el, name: name, value: @model.get(name)}#, args: args}
       if func
         func.bind(@)(opts)
       else
