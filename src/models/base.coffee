@@ -8,6 +8,17 @@ class BaseModel extends Backbone.Model
   params: {}
   urlRoot: ""
 
+  initialize: (options) ->
+    super(options)
+
+    # promise to indicate that the model is loaded
+    this.loaded = new Promise (resolve, reject) =>
+      if this.id
+        resolve()
+      else
+        this.listenToOnce this, "sync", () ->
+          resolve()
+
   url: (extra, params) ->
     parts = []
     if @apiRoot
@@ -45,6 +56,12 @@ class BaseModel extends Backbone.Model
   @collection: (extras) ->
     return new (BaseCollection.extend _.extend(model: @, extras))
 
+  @all: () ->
+    if not this._collection
+      this._collection = this.collection()
+      this._collection.fetch()
+    return this._collection
+
 
 class BaseCollection extends Backbone.Collection
   params: null
@@ -57,6 +74,11 @@ class BaseCollection extends Backbone.Collection
       @params = {}
     if options.pageSize
       @params.page_size = options.pageSize
+
+    # promise to indicate that the collection has synced
+    this.synced = new Promise (resolve, reject) =>
+      this.listenToOnce this, "sync", () ->
+        resolve()
 
   url: (extra, params={}) ->
     if @params

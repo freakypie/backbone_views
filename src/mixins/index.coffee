@@ -36,6 +36,10 @@ class MixinView extends Backbone.View
       @template = @options.template
     @trigger("mixins:loaded", @)
 
+    this.rendered = new Promise (resolve, reject) =>
+      this.listenToOnce this, "render:post", () ->
+        resolve()
+
   listMixins: () ->
     if not @_mixins
       @_mixins = []

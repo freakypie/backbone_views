@@ -106,37 +106,46 @@ class SingleObjectMixin
 
   initialize: (options) ->
     if not @model
-      if not options.id and not @filters
-        console.error "No model id or model filters found on this view", options
-        return
+      @model = @getObject(options)
 
-      if not @collection
-        console.error "No collection found on this view"
-        console.error "options", options
-        return
+  getObject: (options) ->
+    if not options.id and not options.kwargs.id and not @filters
+      console.error "No model id or model filters found on this view", options
+      return
 
-      if @id
-        @filters = {id: @id}
+    if this.getCollection
+      this.collection = this.getCollection(options)
 
-      @model = @collection.findWhere(@filters)
+    if not @collection
+      console.error "No collection found on this view"
+      console.error "options", options
+      return
 
-      if not @model
-        @model = new @collection.model
-        @model.set(@filters)
+    if @id
+      @filters = {id: parseInt(@id)}
+    else if options.kwargs.id
+      @filters = {id: parseInt(options.kwargs.id)}
 
-        if @fetch
-          @model.fetch
-            success: =>
-              @trigger "view:model", @model
-              @handleModelFetched(@model)
+    @model = @collection.findWhere(@filters)
 
-          @collection.add @model
-        else
-          @listenTo @collection, "update", =>
-            model = @collection.findWhere(@filters)
-            if model
-              this.model.set(model.attributes)
+    if not @model
+      @model = new @collection.model
+      @model.set(@filters)
 
+      if @filters.id
+        @collection.add @model
+      else
+        @listenTo @collection, "update", =>
+          model = @collection.findWhere(@filters)
+          if model
+            this.model.set(model.attributes)
+
+      if @fetch
+        @model.fetch
+          success: =>
+            @trigger "view:model", @model
+            @handleModelFetched(@model)
+    return @model
 
   handleModelFetched: (model) ->
     @render()

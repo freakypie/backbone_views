@@ -187,6 +187,7 @@ class ListMixin
         if view
           view.remove()
           delete @views[model.cid]
+    @showEmpty()
     return count
 
   count: () ->

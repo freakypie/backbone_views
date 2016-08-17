@@ -63,6 +63,7 @@ class Routing
           console.error "This view is not an view class or callback", view
 
         if callback
+          # console.log(@prefix + url, url)
           @_router.route(@prefix + url, url, callback)
 
   remove: () ->
