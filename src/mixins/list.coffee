@@ -29,20 +29,50 @@ class ListMixin
     if @collection.params
       @collection.params.page = options.page or 1
 
+    # states: loading <=> listing
+    #                 <=> error
+    count = @count()
+    @listMeta = new Backbone.Model({
+      state: "listing",
+      count: count,
+    });
+
+    # @listenTo @collection, "all", (event) =>
+    #   console.log(" => #{event}")
     @listenTo @collection, "add", (m) =>
       @added(m)
-    @listenTo @collection, 'reset', @addAll
+    @listenTo @collection, 'update', =>
+      @listMeta.set({state: "listing"})
+      @updateFilters()
+    @listenTo @collection, 'reset', =>
+      @listMeta.set({state: "listing"})
+      @updateFilters()
     @listenTo @collection, "sort", ->
       # @empty()
       # @addAll()
       @sort()
+    @listenTo @collection, "request", =>
+      @listMeta.set({state: "loading"})
+      @showAlerts()
+    @listenTo @collection, "error", =>
+      @listMeta.set({state: "error"})
+      @showAlerts()
+    @listenTo @collection, "sync", =>
+      @listMeta.set({state: "listing"})
+      @showAlerts()
+
+    # removed from the collection
     @listenTo @collection, "remove", @removed
-    @listenTo @collection, "request", @showLoading.bind(@, true)
-    @listenTo @collection, "error", @showError
-    @listenTo @collection, "sync", @showLoading.bind(@, false)
+
+    # destroyed
+    @listenTo @collection, "destroy", @removed
 
     @listenTo @, "render:post", =>
+      @prevState = @listMeta.get("state")
+      @listMeta.set({state: "loading"})
       @addAll()
+      @listMeta.set({state: @prevState})
+      @showAlerts()
 
     @listenTo @, "close", (e) =>
       for id, view of @views
@@ -92,7 +122,6 @@ class ListMixin
 
   added: (model, container) ->
     if @filterFunc model, @filters
-      skipShowEmpty = container == undefined
       if not container
         container = @getListElement().get(0)
       view = @getItemView model
@@ -108,9 +137,7 @@ class ListMixin
           container.insertBefore(rendered, el)
         else
           container.appendChild(rendered)
-
-      if not skipShowEmpty
-        @showEmpty()
+      @cachedCount += 1
       return view
     return null
 
@@ -119,7 +146,7 @@ class ListMixin
     if view
       view.remove()
       delete @views[model.cid]
-      @showLoading()
+      @cachedCount -= 1
     return view
 
   addAll: () ->
@@ -128,45 +155,13 @@ class ListMixin
     @views = {}
     if @collection.length > 0
       container = document.createDocumentFragment()
+      @cachedCount = 0
       for model in @collection.models
-        @added model, container
+        retval = @added model, container
+        if retval
+          @cachedCount += 1
       if container
         @getListElement().append(container)
-
-    @showEmpty()
-
-  showError: () ->
-    @showLoading(false)
-    @$el.find(@errorSelector).removeClass @emptyToggleClass
-
-  showLoading: (value) ->
-    if value != undefined
-      @loading = value
-    if not @loading
-      @$el.find(@loadingSelector).addClass @emptyToggleClass
-      @showEmpty()
-    else
-      @$el.find(@loadingSelector).removeClass @emptyToggleClass
-      @$el.find(@errorSelector).addClass @emptyToggleClass
-      @$el.find(@emptySelector).addClass @emptyToggleClass
-
-  showEmpty: () ->
-    if not @loading
-      count = null
-      if @emptySelector or @existsSelector
-        count = @count()
-
-      if @emptySelector
-        if count == 0
-          @$(@emptySelector).removeClass @emptyToggleClass
-        else
-          @$(@emptySelector).addClass @emptyToggleClass
-
-      if @existsSelector
-        if count > 0
-          @$el.find(@existsSelector).removeClass @emptyToggleClass
-        else
-          @$el.find(@existsSelector).addClass @emptyToggleClass
 
   remove: () ->
     for cid, view of @views
@@ -187,7 +182,8 @@ class ListMixin
         if view
           view.remove()
           delete @views[model.cid]
-    @showEmpty()
+    @showAlerts()
+    @cachedCount = count
     return count
 
   count: () ->
@@ -195,7 +191,47 @@ class ListMixin
     for model in this.collection.models
       if @filterFunc model, @filters
         count += 1
+    @cachedCount = count
     return count
+
+  showAlerts: () ->
+    state = @listMeta.get("state", "listing")
+    if state == "listing" and @cachedCount == 0
+      state = "empty"
+
+    states = {
+      "loading": @loadingSelector,
+      "error": @errorSelector,
+      "empty": @emptySelector
+    }
+    activated = false
+    for priority, selector of states
+      # show the alert if it is the current state
+      # unless a higher order alert was already activated
+      if not activated and state == priority
+        @showAlert(selector)
+        activated = true
+      else
+        @hideAlert(selector)
+
+    if @cachedCount > 0
+      @showAlert(@existsSelector)
+    else
+      @hideAlert(@existsSelector)
+
+  showAlert: (selector) ->
+    status = @listMeta.get(selector)
+    if not status or status is undefined
+      # console.log("[alert on] #{selector}")
+      @listMeta.set(selector, true)
+      @$el.find(selector).removeClass @emptyToggleClass
+
+  hideAlert: (selector) ->
+    status = @listMeta.get(selector)
+    if status or status is undefined
+      # console.log("[alert off] #{selector}")
+      @listMeta.set(selector, false)
+      @$el.find(selector).addClass @emptyToggleClass
 
 module.exports =
   mixins:
