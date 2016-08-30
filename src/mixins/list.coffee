@@ -119,6 +119,7 @@ class ListMixin
 
   empty: () ->
     @getListElement().empty()
+    @views = {}
 
   added: (model, container) ->
     if @filterFunc model, @filters
