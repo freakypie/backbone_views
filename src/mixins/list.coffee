@@ -46,10 +46,10 @@ class ListMixin
       @updateFilters()
     @listenTo @collection, 'reset', =>
       @listMeta.set({state: "listing"})
-      @updateFilters()
+      # @updateFilters()
+      @empty()
+      @addAll()
     @listenTo @collection, "sort", ->
-      # @empty()
-      # @addAll()
       @sort()
     @listenTo @collection, "request", =>
       @listMeta.set({state: "loading"})
