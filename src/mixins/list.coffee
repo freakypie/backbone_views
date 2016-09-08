@@ -132,7 +132,7 @@ class ListMixin
       @views[model.cid] = view
 
       if container
-        index = container.children.length
+        index = container.childNodes.length
         model.index = index
       else
         # we must find what position this view should be in
