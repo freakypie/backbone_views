@@ -110,12 +110,15 @@ class ListMixin
         included.push(model)
         index += 1
 
+    @cachedCount = index
+
     for model in included
       view = @views[model.cid]
-      current = view.$el.index()
-      if model.index != current
-        el = @getListElement().children().eq(model.index)
-        el.before(view.$el.detach())
+      if view
+        current = view.$el.index()
+        if model.index != current
+          el = @getListElement().children().eq(model.index)
+          el.before(view.$el.detach())
 
   empty: () ->
     @getListElement().empty()
@@ -127,7 +130,16 @@ class ListMixin
         container = @getListElement().get(0)
       view = @getItemView model
       @views[model.cid] = view
-      index = @collection.indexOf model
+
+      if container
+        index = container.children.length
+        model.index = index
+      else
+        # we must find what position this view should be in
+        # count will tell us which index it is supposed to be at
+        @count()
+        index = model.index
+
       rendered = view.render().el
 
       if not container.childNodes
@@ -176,6 +188,7 @@ class ListMixin
         # if not added, add it
         if not @views[model.cid]
           this.added(model)
+          model.index = count
         count += 1
       else
         # if added, remove it
@@ -191,6 +204,7 @@ class ListMixin
     count = 0
     for model in this.collection.models
       if @filterFunc model, @filters
+        model.index = count
         count += 1
     @cachedCount = count
     return count
