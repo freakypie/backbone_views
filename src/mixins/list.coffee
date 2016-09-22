@@ -41,6 +41,7 @@ class ListMixin
     #   console.log(" => #{event}")
     @listenTo @collection, "add", (m) =>
       @added(m)
+      @showAlerts()
     @listenTo @collection, 'update', =>
       @listMeta.set({state: "listing"})
       @updateFilters()
