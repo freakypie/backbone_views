@@ -109,7 +109,7 @@ class SingleObjectMixin
       @model = @getObject(options)
 
   getObject: (options) ->
-    if not options.id and not options.kwargs.id and not @filters
+    if not @filters and not options.id and not options.kwargs?.id
       console.error "No model id or model filters found on this view", options
       return
 
@@ -121,10 +121,11 @@ class SingleObjectMixin
       console.error "options", options
       return
 
-    if @id
-      @filters = {id: parseInt(@id)}
-    else if options.kwargs.id
-      @filters = {id: parseInt(options.kwargs.id)}
+    if not @filters
+      if @id
+        @filters = {id: parseInt(@id)}
+      else if options.kwargs.id
+        @filters = {id: parseInt(options.kwargs.id)}
 
     @model = @collection.findWhere(@filters)
 

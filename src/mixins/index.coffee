@@ -156,6 +156,7 @@ class NunjucksMixin
 module.exports =
   mixins:
     NunjucksMixin: NunjucksMixin
+    Nunjucks: NunjucksMixin
     SelectorMixin: SelectorMixin
   views:
     MixinView: MixinView
