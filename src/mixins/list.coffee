@@ -41,7 +41,6 @@ class ListMixin
     #   console.log(" => #{event}")
     @listenTo @collection, "add", (m) =>
       @added(m)
-      @showAlerts()
     @listenTo @collection, 'update', =>
       @listMeta.set({state: "listing"})
       @updateFilters()
@@ -152,6 +151,7 @@ class ListMixin
         else
           container.appendChild(rendered)
       @cachedCount += 1
+      @showAlerts()
       return view
     return null
 
@@ -168,14 +168,17 @@ class ListMixin
     @listEl.empty()
     @views = {}
     if @collection.length > 0
+      @addGroup(@collection.models)
+
+  addGroup: (group) ->
+    if group.length > 0
+      console.log("---- grouping ----")
+
       container = document.createDocumentFragment()
-      @cachedCount = 0
-      for model in @collection.models
-        retval = @added model, container
-        if retval
-          @cachedCount += 1
-      if container
-        @getListElement().append(container)
+      group.forEach (instance) =>
+        this.added(instance, container)
+
+      this.getListElement().append(container)
 
   remove: () ->
     for cid, view of @views
@@ -197,8 +200,10 @@ class ListMixin
         if view
           view.remove()
           delete @views[model.cid]
-    @showAlerts()
+
     @cachedCount = count
+    @showAlerts()
+
     return count
 
   count: () ->
@@ -241,6 +246,8 @@ class ListMixin
       # console.log("[alert on] #{selector}")
       @listMeta.set(selector, true)
       @$el.find(selector).removeClass @emptyToggleClass
+    # else
+    #   console.log("[alert already on] #{selector} #{status}")
 
   hideAlert: (selector) ->
     status = @listMeta.get(selector)
@@ -248,6 +255,8 @@ class ListMixin
       # console.log("[alert off] #{selector}")
       @listMeta.set(selector, false)
       @$el.find(selector).addClass @emptyToggleClass
+    # else
+    #   console.log("[alert already off] #{selector} #{status}")
 
 module.exports =
   mixins:
