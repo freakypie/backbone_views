@@ -172,8 +172,6 @@ class ListMixin
 
   addGroup: (group) ->
     if group.length > 0
-      console.log("---- grouping ----")
-
       container = document.createDocumentFragment()
       group.forEach (instance) =>
         this.added(instance, container)
