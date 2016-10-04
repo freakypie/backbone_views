@@ -10,6 +10,7 @@ class ListMixin
   loadingSelector: ".loading"
   errorSelector: ".error"
   emptyToggleClass: "hide"
+  listLimit: null
   filters: null
   filterFunc: (model, filters) ->
     if filters
@@ -124,35 +125,39 @@ class ListMixin
     @getListElement().empty()
     @views = {}
 
-  added: (model, container) ->
+  added: (model, container, sIndex) ->
     if @filterFunc model, @filters
+      # console.time("added #{model.id}")
       if not container
         container = @getListElement().get(0)
-      view = @getItemView model
-      @views[model.cid] = view
 
+      # we must find what position this view should be in
+      # count will tell us which index it is supposed to be at
+      model.index = sIndex or @cachedCount
+      index = model.index
+
+      # if using a container, we'll have to modify the index just a bit
+      # Might want to sort this later
       if container
         index = container.childNodes.length
-        model.index = index
-      else
-        # we must find what position this view should be in
-        # count will tell us which index it is supposed to be at
-        @count()
-        index = model.index
 
-      rendered = view.render().el
+      if this.listLimit is null or model.index < this.listLimit
+        view = @getItemView model
+        @views[model.cid] = view
+        rendered = view.render().el
 
-      if not container.childNodes
-        container.appendChild(rendered)
-      else
-        el = container.childNodes[index]
-        if el
-          container.insertBefore(rendered, el)
-        else
+        if not container.childNodes
           container.appendChild(rendered)
-      @cachedCount += 1
-      @showAlerts()
-      return view
+        else
+          el = container.childNodes[index]
+          if el
+            container.insertBefore(rendered, el)
+          else
+            container.appendChild(rendered)
+        @cachedCount += 1
+        @showAlerts()
+        # console.timeEnd("added #{model.id}")
+        return view
     return null
 
   removed: (model) ->
@@ -187,10 +192,11 @@ class ListMixin
     count = 0
     for model in this.collection.models
       if @filterFunc model, @filters
-        # if not added, add it
-        if not @views[model.cid]
-          this.added(model)
-          model.index = count
+        # should this view be added?
+        if (this.listLimit is null or count < this.listLimit) and \
+            not @views[model.cid]
+          this.added(model, null, count)
+        model.index = count
         count += 1
       else
         # if added, remove it
@@ -204,13 +210,16 @@ class ListMixin
 
     return count
 
-  count: () ->
+  count: (countUntil) ->
     count = 0
     for model in this.collection.models
+      if countUntil and model.id == countUntil.id
+        break
       if @filterFunc model, @filters
         model.index = count
         count += 1
-    @cachedCount = count
+    if not countUntil
+      @cachedCount = count
     return count
 
   showAlerts: () ->

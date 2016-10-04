@@ -136,6 +136,28 @@ class BaseCollection extends Backbone.Collection
             instance.set(instance2.attributes)
     return instance
 
+  getWhen: (filters, timeout=3000) ->
+    return new Promise((resolve, reject) =>
+      listener = () =>
+        temp = this.findWhere(filters)
+        if temp
+          this.stopListening(this, "update", listener)
+          this.stopListening(this, "reset", listener)
+          resolve(temp)
+        return temp
+
+      if not listener()
+        this.listenTo(this, "update", listener)
+        this.listenTo(this, "reset", listener)
+
+        if timeout
+          _.delay =>
+            this.stopListening(this, "update", listener)
+            this.stopListening(this, "reset", listener)
+            reject(null)
+          , timeout
+    )
+
   fetchAllPages: (page=1) ->
     """ Recursively fetch all pages starting at the given page """
     return new Promise (resolve, reject) =>
