@@ -40,8 +40,8 @@ class ListMixin
 
     # @listenTo @collection, "all", (event) =>
     #   console.log(" => #{event}")
-    @listenTo @collection, "add", (m) =>
-      @added(m)
+    # @listenTo @collection, "add", (m) =>
+    #   @added(m)
     @listenTo @collection, 'update', =>
       @listMeta.set({state: "listing"})
       @updateFilters()
@@ -65,8 +65,8 @@ class ListMixin
     # removed from the collection
     @listenTo @collection, "remove", @removed
 
-    # destroyed
-    @listenTo @collection, "destroy", @removed
+    # # destroyed
+    # @listenTo @collection, "destroy", @removed
 
     @listenTo @, "render:post", =>
       @prevState = @listMeta.get("state")
@@ -127,38 +127,45 @@ class ListMixin
 
   added: (model, container, sIndex) ->
     if @filterFunc model, @filters
-      # console.time("added #{model.id}")
-      if not container
-        container = @getListElement().get(0)
-
-      # we must find what position this view should be in
-      # count will tell us which index it is supposed to be at
-      model.index = sIndex or @cachedCount
-      index = model.index
-
-      # if using a container, we'll have to modify the index just a bit
-      # Might want to sort this later
-      if container
-        index = container.childNodes.length
-
-      if this.listLimit is null or model.index < this.listLimit
-        view = @getItemView model
-        @views[model.cid] = view
-        rendered = view.render().el
-
-        if not container.childNodes
-          container.appendChild(rendered)
-        else
-          el = container.childNodes[index]
-          if el
-            container.insertBefore(rendered, el)
-          else
-            container.appendChild(rendered)
-        @cachedCount += 1
-        @showAlerts()
-        # console.timeEnd("added #{model.id}")
-        return view
+      view = @_added(model, container, sIndex)
+      @showAlerts()
+      return view
     return null
+
+  _added: (model, container, sIndex) ->
+    # console.time("added #{model.id}")
+    if not container
+      container = @getListElement().get(0)
+
+    # we must find what position this view should be in
+    # count will tell us which index it is supposed to be at
+    if sIndex is undefined
+      model.index = @cachedCount
+    else
+      model.index = sIndex
+    index = model.index
+
+    # if using a container, we'll have to modify the index just a bit
+    # Might want to sort this later
+    if container
+      index = container.childNodes.length
+
+    if this.listLimit is null or model.index < this.listLimit
+      view = @getItemView model
+      @views[model.cid] = view
+      rendered = view.render().el
+
+      if not container.childNodes
+        container.appendChild(rendered)
+      else
+        el = container.childNodes[index]
+        if el
+          container.insertBefore(rendered, el)
+        else
+          container.appendChild(rendered)
+      @cachedCount += 1
+      # console.timeEnd("added #{model.id}")
+      return view
 
   removed: (model) ->
     view = @views[model.cid]
@@ -193,17 +200,16 @@ class ListMixin
     for model in this.collection.models
       if @filterFunc model, @filters
         # should this view be added?
-        if (this.listLimit is null or count < this.listLimit) and \
-            not @views[model.cid]
-          this.added(model, null, count)
+        if (this.listLimit is null or count < this.listLimit)
+          if not @views[model.cid]
+            this._added(model, null, count)
+        else if @views[model.cid]
+          this.removed(model)
         model.index = count
         count += 1
       else
         # if added, remove it
-        view = @views[model.cid]
-        if view
-          view.remove()
-          delete @views[model.cid]
+        @removed(model)
 
     @cachedCount = count
     @showAlerts()
