@@ -21,6 +21,9 @@ class Composite
         @compost[selector] = view
         view.render()
 
+  remove: () ->
+    for selector, view of @compost
+      view.remove()
 
 module.exports =
   mixins:
