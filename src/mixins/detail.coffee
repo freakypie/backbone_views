@@ -6,6 +6,12 @@ class DetailMixin
   detailSelector: null
   autoBind: (name) -> "[data-" + name + "]"
   dataActions:
+    "toggle-content": (opts) ->
+      if opts.value
+        opts.el.show()
+        opts.el.html(opts.value)
+      else
+        opts.el.hide()
     "toggle": (opts) ->
       if opts.value
         opts.el.show()

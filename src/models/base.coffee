@@ -182,6 +182,8 @@ class BaseCollection extends Backbone.Collection
         remove: false,
         success: (retval) ->
           resolve()
+        error: (collection, xhr) ->
+          reject(xhr)
       })
 
 

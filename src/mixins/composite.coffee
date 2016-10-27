@@ -2,9 +2,9 @@ _ = require "underscore"
 
 class Composite
   views: {}
-  compost: {}
 
   initialize: (options) ->
+    this.compost = {}
     @listenTo @, "render:post", @renderViews
 
   createView: (viewClass, options) ->
