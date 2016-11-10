@@ -1,7 +1,7 @@
 index = require "../mixins/index"
 list = require "../mixins/list"
 detail = require "../mixins/detail"
-form = require "../mixins/forms"
+# form = require "../mixins/forms"
 _ = require "underscore"
 
 
@@ -44,62 +44,62 @@ class ListView extends index.views.MixinView
         for view in @paginationViews
           view.render()
 
-class CreateView extends index.views.MixinView
-  base_mixins: [form.mixins.AutoFormMixin, form.mixins.FormMixin]
-  template: _.template "<form><%= form %></form>"
-
-  initialize: (options={}) ->
-    super(options)
-
-    if not @model
-      if @collection
-        @model = new @collection.model
-      else
-        console.error "You must provide a either a model or " + \
-          "collection use CreateView"
-
-  getData: () ->
-    return @model.attributes
-
-  formValid: (form) ->
-    valid = @model.save(
-      form.data,
-      success: @success.bind(@, @model)
-      error: (model, retval) =>
-        console.log "failed to save", form, retval.responseJSON
-        @formInvalid(form, retval.responseJSON)
-    )
-    if valid is false
-      @formInvalid(form)
-
-  success: (model) ->
-    if @collection
-      @collection.add model
-
-
-class UpdateView extends index.views.MixinView
-  base_mixins: [
-    detail.mixins.SingleObjectMixin,
-    form.mixins.AutoFormMixin,
-    form.mixins.FormMixin
-  ]
-  template: _.template "<form><%= form %></form>"
-
-  getData: () ->
-    return @model.attributes
-
-  formValid: (form) ->
-    valid = @model.save(
-      form.data,
-      success: @success.bind(@)
-      error: (retval) =>
-        console.log "failed to save"
-        @formInvalid(form, retval)
-    )
-    if valid is false
-      @formInvalid(form)
-
-  success: (model) ->
+# class CreateView extends index.views.MixinView
+#   base_mixins: [form.mixins.AutoFormMixin, form.mixins.FormMixin]
+#   template: _.template "<form><%= form %></form>"
+#
+#   initialize: (options={}) ->
+#     super(options)
+#
+#     if not @model
+#       if @collection
+#         @model = new @collection.model
+#       else
+#         console.error "You must provide a either a model or " + \
+#           "collection use CreateView"
+#
+#   getData: () ->
+#     return @model.attributes
+#
+#   formValid: (form) ->
+#     valid = @model.save(
+#       form.data,
+#       success: @success.bind(@, @model)
+#       error: (model, retval) =>
+#         console.log "failed to save", form, retval.responseJSON
+#         @formInvalid(form, retval.responseJSON)
+#     )
+#     if valid is false
+#       @formInvalid(form)
+#
+#   success: (model) ->
+#     if @collection
+#       @collection.add model
+#
+#
+# class UpdateView extends index.views.MixinView
+#   base_mixins: [
+#     detail.mixins.SingleObjectMixin,
+#     form.mixins.AutoFormMixin,
+#     form.mixins.FormMixin
+#   ]
+#   template: _.template "<form><%= form %></form>"
+#
+#   getData: () ->
+#     return @model.attributes
+#
+#   formValid: (form) ->
+#     valid = @model.save(
+#       form.data,
+#       success: @success.bind(@)
+#       error: (retval) =>
+#         console.log "failed to save"
+#         @formInvalid(form, retval)
+#     )
+#     if valid is false
+#       @formInvalid(form)
+#
+#   success: (model) ->
 
 
 class DeleteView extends index.views.MixinView
@@ -111,6 +111,6 @@ module.exports =
   views:
     ListView: ListView
     DetailView: DetailView
-    CreateView: CreateView
-    UpdateView: UpdateView
+    # CreateView: CreateView
+    # UpdateView: UpdateView
     DeleteView: DeleteView
