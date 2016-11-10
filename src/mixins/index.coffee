@@ -14,6 +14,10 @@ class MixinView extends Backbone.View
     @options = options
     _.extend(@, options)
 
+    this.rendered = new Promise (resolve, reject) =>
+      this.listenToOnce this, "render:post", () ->
+        resolve()
+
     for mixin in @listMixins()
       if mixin
 
@@ -36,10 +40,6 @@ class MixinView extends Backbone.View
       @template = @options.template
     @trigger("mixins:loaded", @)
 
-    this.rendered = new Promise (resolve, reject) =>
-      this.listenToOnce this, "render:post", () ->
-        resolve()
-
   listMixins: () ->
     if not @_mixins
       @_mixins = []
@@ -47,7 +47,7 @@ class MixinView extends Backbone.View
         if m
           @_mixins.push m.prototype
         else
-          console.error "Mixin is invalid"
+          console.error "Mixin is invalid!: ", m, this
     return @_mixins
 
   @listMixins: (viewClass) ->
