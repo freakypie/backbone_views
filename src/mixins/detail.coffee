@@ -96,11 +96,11 @@ class DetailMixin
     @getSubPanel().find(selector).each (idx, e) =>
       el = @.$(e)
       action = el.attr("data-#{name}") or "default"
-      # args = action.split(":")
-      # action = args[0]
-      # args = args[1..]
+      args = action.split(":")
+      action = args[0]
+      args = args[1..]
       func = @dataActions[action]
-      opts = {el: el, name: name, value: @model.get(name)}#, args: args}
+      opts = {el: el, name: name, value: @model.get(name), args: args}
       if func
         func.bind(@)(opts)
       else
