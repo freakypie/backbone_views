@@ -50,7 +50,9 @@ class ListMixin
       @empty()
       @updateFilters()
     @listenTo @collection, "sort", ->
-      @sort()
+      # objects might be added after sort is called. not sure why
+      # defering it makes the added objects available to sort
+      _.defer( => @sort())
     @listenTo @collection, "request", =>
       @listMeta.set({state: "loading"})
       @showAlerts()
@@ -116,9 +118,12 @@ class ListMixin
       view = @views[model.cid]
       if view
         current = view.$el.index()
-        if model.index != current
+        if current == -1 or model.index != current
           el = @getListElement().children().eq(model.index)
-          el.before(view.$el.detach())
+          if el.length > 0
+            el.before(view.$el)
+          else
+            @getListElement().append(view.$el)
 
   empty: () ->
     @getListElement().empty()
@@ -132,7 +137,6 @@ class ListMixin
     return null
 
   _added: (model, container, sIndex) ->
-    # console.time("added #{model.id}")
     if not container
       container = @getListElement().get(0)
 
@@ -163,7 +167,6 @@ class ListMixin
         else
           container.appendChild(rendered)
       @cachedCount += 1
-      # console.timeEnd("added #{model.id}")
       return view
 
   removed: (model) ->
