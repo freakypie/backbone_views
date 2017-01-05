@@ -114,6 +114,8 @@ class Modal extends base.views.MixinView
 
     @listenTo @, "render:post", =>
       @$el.on "hidden.bs.modal", =>
+        if @close
+          @close({button: null, modal: this})
         @remove()
       @$el.modal(this.modalOptions)
 
@@ -153,7 +155,11 @@ class Modal extends base.views.MixinView
       )
 
   handleCancel: (e) ->
-    null
+    if @close
+      @close(
+        button: null,
+        modal: @
+      )
 
   show: () ->
     @$el.modal("show")
