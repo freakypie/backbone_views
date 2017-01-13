@@ -1,7 +1,7 @@
 index = require "../mixins/index"
 list = require "../mixins/list"
 detail = require "../mixins/detail"
-form = require "../mixins/forms"
+# form = require "../mixins/forms"
 _ = require "underscore"
 
 
@@ -45,7 +45,7 @@ class ListView extends index.views.MixinView
           view.render()
 
 class CreateView extends index.views.MixinView
-  base_mixins: [form.mixins.AutoFormMixin, form.mixins.FormMixin]
+  # base_mixins: [form.mixins.AutoFormMixin, form.mixins.FormMixin]
   template: _.template "<form><%= form %></form>"
 
   initialize: (options={}) ->
@@ -80,8 +80,8 @@ class CreateView extends index.views.MixinView
 class UpdateView extends index.views.MixinView
   base_mixins: [
     detail.mixins.SingleObjectMixin,
-    form.mixins.AutoFormMixin,
-    form.mixins.FormMixin
+    # form.mixins.AutoFormMixin,
+    # form.mixins.FormMixin
   ]
   template: _.template "<form><%= form %></form>"
 
