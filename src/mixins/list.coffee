@@ -117,13 +117,13 @@ class ListMixin
     for model in included
       view = @views[model.cid]
       if view
-        current = view.$el.index()
+        current = Backbone.$(view.$el).index()
         if current == -1 or model.index != current
           el = @getListElement().children().eq(model.index)
           if el.length > 0
-            el.before(view.$el)
+            el.before(Backbone.$(view.$el))
           else
-            @getListElement().append(view.$el)
+            @getListElement().append(Backbone.$(view.$el))
 
   empty: () ->
     @getListElement().empty()
